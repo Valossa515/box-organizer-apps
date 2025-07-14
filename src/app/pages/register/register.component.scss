@@ -1,0 +1,46 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.full-width {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.error {
+  color: red;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.link-button {
+  display: block;
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+  }
+}

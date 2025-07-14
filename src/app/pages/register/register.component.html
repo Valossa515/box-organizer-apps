@@ -1,0 +1,35 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <h2 class="register-title">Criar Conta</h2>
+
+    <form (ngSubmit)="register()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nome</mat-label>
+        <input matInput type="text" [(ngModel)]="form.name" name="name" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" [(ngModel)]="form.email" name="email" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" [(ngModel)]="form.password" name="password" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Confirmar Senha</mat-label>
+        <input matInput type="password" [(ngModel)]="form.confirmPassword" name="confirmPassword" required />
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.loading" class="full-width">
+        {{ form.loading ? 'Cadastrando...' : 'Criar Conta' }}
+      </button>
+
+      <p *ngIf="form.error" class="error">{{ form.error }}</p>
+
+      <a routerLink="" class="link-button">Já tem conta? Entrar</a>
+    </form>
+  </mat-card>
+</div>

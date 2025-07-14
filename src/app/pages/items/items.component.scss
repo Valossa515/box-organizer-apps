@@ -1,0 +1,763 @@
+// Variáveis de design
+$primary: #1976d2;
+$primary-dark: #1565c0;
+$accent: #4caf50;
+$warn: #e53935;
+$text-dark: #333;
+$text-medium: #555;
+$text-light: #777;
+$background: #f5f7fa;
+$card-bg: #ffffff;
+$border: #e0e0e0;
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Mixins
+@mixin card {
+  background: $card-bg;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+}
+
+@mixin button-reset {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+}
+
+// Estilos globais
+.items-app-container {
+  font-family: 'Roboto', sans-serif;
+  background: $background;
+  min-height: 100vh;
+  padding-bottom: $spacing-xl;
+}
+
+// Cabeçalho
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background: $card-bg;
+  box-shadow: $shadow-sm;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: $spacing-md;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 $spacing-md;
+  }
+
+  .back-button {
+    @include button-reset;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: $primary;
+    background: rgba($primary, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba($primary, 0.2);
+    }
+
+    mat-icon {
+      font-size: 1.5rem;
+    }
+  }
+
+  .add-button {
+    @include button-reset;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: $accent;
+    color: white;
+    border-radius: $radius-md;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:hover {
+      background: darken($accent, 10%);
+    }
+
+    &.active {
+      background: $warn;
+    }
+
+    mat-icon {
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding: $spacing-sm;
+    gap: $spacing-sm;
+
+    h1 {
+      font-size: 1.2rem;
+      padding: 0 $spacing-xs;
+    }
+
+    .add-button {
+      padding: $spacing-xs;
+      span {
+        display: none;
+      }
+    }
+  }
+}
+
+// Barra de pesquisa
+.search-bar {
+  padding: $spacing-md $spacing-lg;
+  background: $card-bg;
+  border-bottom: 1px solid $border;
+
+  .search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .search-icon {
+      position: absolute;
+      left: $spacing-md;
+      color: $text-medium;
+      z-index: 1;
+    }
+
+    input {
+      width: 100%;
+      padding: $spacing-md $spacing-md $spacing-md $spacing-xl * 1.5;
+      border: 1px solid $border;
+      border-radius: $radius-md;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 2px rgba($primary, 0.2);
+      }
+
+      &::placeholder {
+        color: $text-light;
+      }
+    }
+
+    .clear-search {
+      @include button-reset;
+      position: absolute;
+      right: $spacing-md;
+      color: $text-medium;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+// Formulários
+.item-form-container {
+  padding: $spacing-lg;
+  box-sizing: border-box;
+
+  .item-form {
+    @include card;
+    padding: $spacing-lg;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: $spacing-lg;
+      color: $text-dark;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: $spacing-md;
+      width: 100%;
+      box-sizing: border-box;
+
+      label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        font-weight: 500;
+        color: $text-dark;
+      }
+
+      input,
+      textarea {
+        width: calc(100% - #{$spacing-md * 2});
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid $border;
+        border-radius: $radius-sm;
+        box-sizing: border-box;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          box-shadow: 0 0 0 2px rgba($primary, 0.1);
+        }
+      }
+
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+    }
+
+    .form-row {
+      display: flex;
+      gap: $spacing-md;
+
+      .form-group {
+        flex: 1;
+      }
+    }
+
+    .image-upload-container {
+      .upload-button {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-sm $spacing-md;
+        background: rgba($primary, 0.05);
+        color: $primary;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: $spacing-sm;
+
+        &:hover {
+          background: rgba($primary, 0.1);
+        }
+
+        input[type="file"] {
+          display: none;
+        }
+      }
+
+      .image-preview {
+        position: relative;
+        width: 100%;
+        max-height: 200px;
+        border-radius: $radius-sm;
+        overflow: hidden;
+        border: 1px dashed $border;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .remove-image {
+          @include button-reset;
+          position: absolute;
+          top: $spacing-sm;
+          right: $spacing-sm;
+          background: rgba($warn, 0.9);
+          color: white;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: $warn;
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-md;
+      margin-top: $spacing-lg;
+
+      button {
+        @include button-reset;
+        padding: $spacing-sm $spacing-lg;
+        border-radius: $radius-sm;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .save-button {
+        background: $primary;
+        color: white;
+
+        &:hover {
+          background: $primary-dark;
+        }
+      }
+
+      .cancel-button {
+        background: none;
+        color: $warn;
+        border: 1px solid $warn;
+
+        &:hover {
+          background: rgba($warn, 0.05);
+        }
+      }
+    }
+  }
+}
+
+// Container de itens
+.items-container {
+  padding: 0 $spacing-lg;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-md;
+    padding: $spacing-xl;
+    color: $text-medium;
+
+    mat-spinner {
+      width: 24px !important;
+      height: 24px !important;
+
+      svg {
+        width: 24px !important;
+        height: 24px !important;
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: $spacing-xl;
+    color: $text-medium;
+
+    mat-icon {
+      font-size: 3rem;
+      width: auto;
+      height: auto;
+      margin-bottom: $spacing-md;
+      color: rgba($text-medium, 0.3);
+    }
+
+    h3 {
+      margin: 0 0 $spacing-sm;
+      color: $text-dark;
+    }
+
+    p {
+      margin: 0 0 $spacing-lg;
+    }
+
+    .add-item-button {
+      @include button-reset;
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-sm;
+      padding: $spacing-sm $spacing-md;
+      background: $primary;
+      color: white;
+      border-radius: $radius-md;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $primary-dark;
+      }
+    }
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Cards de itens
+.item-card {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md;
+    border-bottom: 1px solid $border;
+
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: $text-dark;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: $spacing-xs;
+
+      button {
+        @include button-reset;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+
+        mat-icon {
+          font-size: 1.2rem;
+        }
+      }
+
+      .edit-button {
+        color: $primary;
+        background: rgba($primary, 0.1);
+
+        &:hover {
+          background: rgba($primary, 0.2);
+        }
+      }
+
+      .delete-button {
+        color: $warn;
+        background: rgba($warn, 0.1);
+
+        &:hover {
+          background: rgba($warn, 0.2);
+        }
+      }
+    }
+  }
+
+  .card-body {
+    padding: $spacing-md;
+    flex-grow: 1;
+
+    .item-image {
+      width: 100%;
+      height: 180px;
+      margin-bottom: $spacing-md;
+      border-radius: $radius-sm;
+      overflow: hidden;
+      background: #f0f0f0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .item-description {
+      margin: 0 0 $spacing-md;
+      color: $text-medium;
+      line-height: 1.5;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+      margin-top: $spacing-md;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        color: $text-medium;
+        font-size: 0.9rem;
+
+        mat-icon {
+          font-size: 1rem;
+          color: $primary;
+        }
+      }
+    }
+  }
+
+  .card-footer {
+    padding: $spacing-md;
+    border-top: 1px solid $border;
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-md;
+
+      .quantity-button {
+        @include button-reset;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: $primary;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: $primary-dark;
+        }
+
+        mat-icon {
+          font-size: 1.2rem;
+        }
+      }
+
+      .quantity-value {
+        font-size: 1.2rem;
+        font-weight: 500;
+        min-width: 30px;
+        text-align: center;
+      }
+    }
+
+    .delete-confirm {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-md;
+      margin-top: $spacing-sm;
+
+      span {
+        color: $warn;
+        font-weight: 500;
+      }
+
+      .confirm-button {
+        @include button-reset;
+        padding: $spacing-xs $spacing-sm;
+        background: $warn;
+        color: white;
+        border-radius: $radius-sm;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: darken($warn, 10%);
+        }
+      }
+    }
+  }
+
+  .edit-form {
+    padding: $spacing-md;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: $spacing-md;
+      color: $text-dark;
+    }
+
+    .form-group {
+      margin-bottom: $spacing-md;
+
+      label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        font-weight: 500;
+        color: $text-dark;
+
+        &::after {
+          content: ' *';
+          color: #e53935;
+          opacity: 0.8;
+        }
+      }
+
+      input,
+      textarea {
+        width: calc(100% - #{$spacing-md * 2}) !important;
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid $border;
+        box-sizing: border-box !important;
+        border-radius: $radius-sm;
+        font-size: 1rem;
+        
+
+        &.ng-invalid.ng-touched {
+          border-color: #e53935;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+        }
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .error-message {
+        color: #e53935;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .image-upload-container {
+      .upload-button {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-xs $spacing-sm;
+        background: rgba($primary, 0.05);
+        color: $primary;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: $spacing-sm;
+        font-size: 0.9rem;
+
+        &:hover {
+          background: rgba($primary, 0.1);
+        }
+
+        input[type="file"] {
+          display: none;
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-sm;
+      margin-top: $spacing-md;
+
+      button {
+        @include button-reset;
+        padding: $spacing-sm $spacing-md;
+        border-radius: $radius-sm;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .save-button {
+        background: $primary;
+        color: white;
+
+        &:hover {
+          background: $primary-dark;
+        }
+      }
+
+      .cancel-button {
+        background: none;
+        color: $text-medium;
+        border: 1px solid $border;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
+  }
+
+  .error-message {
+    color: #e53935;
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }
+
+  input.ng-invalid.ng-touched {
+    border-color: #e53935;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    font-size: 20px;
+
+    &:disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-weight: bold;
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,51 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <h2 class="login-title">Login</h2>
+
+    <form (submit)="login($event)">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          type="email"
+          [(ngModel)]="form.email"
+          name="email"
+          required
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Senha</mat-label>
+        <input
+          matInput
+          type="password"
+          [(ngModel)]="form.password"
+          name="password"
+          required
+        />
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="form.loading"
+        class="full-width"
+      >
+        {{ form.loading ? "Entrando..." : "Entrar" }}
+      </button>
+
+      <p *ngIf="form.error" class="error">{{ form.error }}</p>
+    </form>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      routerLink="/register"
+      class="full-width"
+      (click)="register()"
+    >
+      Criar uma conta
+    </button>
+  </mat-card>
+</div>

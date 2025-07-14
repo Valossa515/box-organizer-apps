@@ -1,0 +1,323 @@
+<div class="items-app-container">
+  <!-- Cabeçalho -->
+  <header class="app-header">
+    <button class="back-button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Itens da caixa</h1>
+    <button
+      class="add-button"
+      (click)="showAddForm = !showAddForm"
+      [class.active]="showAddForm"
+    >
+      <mat-icon>{{ showAddForm ? "close" : "add" }}</mat-icon>
+      {{ showAddForm ? "Cancelar" : "Adicionar" }}
+    </button>
+  </header>
+
+  <div class="pagination-controls" *ngIf="!searchName && totalPages > 0">
+    <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <span>Página {{ currentPage }} de {{ totalPages }}</span>
+
+    <button
+      [disabled]="currentPage === totalPages"
+      (click)="goToPage(currentPage + 1)"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <!-- Barra de pesquisa -->
+  <div class="search-bar">
+    <div class="search-container">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        type="text"
+        [(ngModel)]="searchName"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Pesquisar itens..."
+      />
+      <button class="clear-search" (click)="clearSearch()" *ngIf="searchName">
+        <mat-icon>clear</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulário de adição -->
+  <div class="item-form-container" *ngIf="showAddForm">
+    <div class="item-form">
+      <h2>Adicionar Novo Item</h2>
+
+      <div class="form-group">
+        <label for="item-name">Nome *</label>
+        <input
+          id="item-name"
+          type="text"
+          [(ngModel)]="newItem.name"
+          placeholder="Digite o nome do item"
+          required
+          #nameInput="ngModel"
+        />
+        <div
+          *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
+          class="error-message"
+        >
+          Nome é obrigatório
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="item-description">Descrição</label>
+        <textarea
+          id="item-description"
+          [(ngModel)]="newItem.description"
+          placeholder="Digite a descrição do item"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="item-quantity">Quantidade *</label>
+        <input
+          id="item-quantity"
+          type="number"
+          [(ngModel)]="newItem.quantity"
+          min="1"
+          required
+          #quantityInput="ngModel"
+        />
+        <div
+          *ngIf="
+            quantityInput.invalid &&
+            (quantityInput.dirty || quantityInput.touched)
+          "
+          class="error-message"
+        >
+          Quantidade deve ser maior que zero
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="item-image">Imagem</label>
+        <div class="image-upload-container">
+          <label for="item-image" class="upload-button">
+            <mat-icon>upload</mat-icon>
+            <span>Selecionar Imagem</span>
+          </label>
+          <input
+            id="item-image"
+            type="file"
+            (change)="handleAddImage($event)"
+            accept="image/*"
+          />
+          <div *ngIf="newItem.imgUrl" class="image-preview">
+            <img [src]="newItem.imgUrl" alt="Preview" />
+            <button class="remove-image" (click)="newItem.imgUrl = ''">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="save-button" (click)="createItem()">Salvar Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de itens -->
+  <div class="items-container">
+    <!-- Indicador de carregamento -->
+    <div *ngIf="loading" class="loading-indicator">
+      <mat-spinner></mat-spinner>
+      <span>Carregando itens...</span>
+    </div>
+
+    <!-- Mensagem quando não há itens -->
+    <div *ngIf="!loading && items.length === 0" class="empty-state">
+      <mat-icon>inventory_2</mat-icon>
+      <h3>Nenhum item encontrado</h3>
+      <p *ngIf="searchName">
+        Sua busca por "{{ searchName }}" não retornou resultados
+      </p>
+      <button class="add-item-button" (click)="showAddForm = true">
+        <mat-icon>add</mat-icon> Adicionar Item
+      </button>
+    </div>
+
+    <!-- Grid de itens -->
+    <div class="items-grid">
+      <div class="item-card" *ngFor="let item of items">
+        <div *ngIf="editingItemId !== item.id; else editForm">
+          <!-- Cabeçalho do card -->
+          <div class="card-header">
+            <h3>{{ item.name }}</h3>
+            <div class="card-actions">
+              <button class="edit-button" (click)="startEdit(item)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                class="delete-button"
+                (click)="
+                  confirmDeleteItemId === item.id
+                    ? cancelDelete()
+                    : deleteItemConfirm(item.id)
+                "
+              >
+                <mat-icon>{{
+                  confirmDeleteItemId === item.id ? "close" : "delete"
+                }}</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Corpo do card -->
+          <div class="card-body">
+            <div *ngIf="item.imgUrl" class="item-image">
+              <img [src]="item.imgUrl" alt="{{ item.name }}" />
+            </div>
+
+            <p class="item-description">
+              {{ item.description || "Sem descrição" }}
+            </p>
+
+            <div class="item-meta">
+              <div class="meta-item">
+                <mat-icon>inventory</mat-icon>
+                <span>Quantidade: {{ item.quantity }}</span>
+              </div>
+              <div class="meta-item">
+                <mat-icon>folder</mat-icon>
+                <span>{{ item.boxName || "Sem caixa" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rodapé do card -->
+          <div class="card-footer">
+            <div class="quantity-controls">
+              <button
+                class="quantity-button"
+                (click)="changeQuantity(item, -1)"
+              >
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="quantity-value">{{ item.quantity }}</span>
+              <button class="quantity-button" (click)="changeQuantity(item, 1)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+
+            <div *ngIf="confirmDeleteItemId === item.id" class="delete-confirm">
+              <span>Tem certeza?</span>
+              <button class="confirm-button" (click)="confirmDelete(item.id)">
+                Sim
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulário de edição -->
+        <ng-template #editForm>
+          <div class="edit-form">
+            <h3>Editar Item</h3>
+
+            <div class="form-group">
+              <label>Nome *</label>
+              <input
+                type="text"
+                [(ngModel)]="editItemModel.name"
+                placeholder="Nome do item"
+                required
+                #editNameInput="ngModel"
+              />
+              <div
+                *ngIf="
+                  editNameInput.invalid &&
+                  (editNameInput.dirty || editNameInput.touched)
+                "
+                class="error-message"
+              >
+                Nome é obrigatório
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Descrição *</label>
+              <textarea
+                [(ngModel)]="editItemModel.description"
+                placeholder="Descrição do item"
+                required
+                #editDescriptionInput="ngModel"
+              ></textarea>
+              <div
+                *ngIf="
+                  editDescriptionInput.invalid &&
+                  (editDescriptionInput.dirty || editDescriptionInput.touched)
+                "
+                class="error-message"
+              >
+                Descrição é obrigatória
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Quantidade *</label>
+              <input
+                type="number"
+                [(ngModel)]="editItemModel.quantity"
+                min="1"
+                required
+                #editQuantityInput="ngModel"
+              />
+              <div
+                *ngIf="
+                  editQuantityInput.invalid &&
+                  (editQuantityInput.dirty || editQuantityInput.touched)
+                "
+                class="error-message"
+              >
+                Quantidade deve ser maior que zero
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Imagem</label>
+              <div class="image-upload-container">
+                <label class="upload-button">
+                  <mat-icon>upload</mat-icon>
+                  <span>Alterar Imagem</span>
+                  <input
+                    type="file"
+                    (change)="handleEditImage($event)"
+                    accept="image/*"
+                  />
+                </label>
+                <div *ngIf="editItemModel.imgUrl" class="image-preview">
+                  <img [src]="editItemModel.imgUrl" alt="Preview" />
+                  <button
+                    class="remove-image"
+                    (click)="editItemModel.imgUrl = ''"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="save-button" (click)="saveEdit(item)">
+                Salvar
+              </button>
+              <button class="cancel-button" (click)="cancelEdit()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
