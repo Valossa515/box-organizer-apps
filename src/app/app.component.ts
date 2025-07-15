@@ -18,24 +18,21 @@ export class AppComponent {
   }
 
   async initializeApp() {
-    const currentUrl = this.router.url;
+    const isLogged = await this.authService.isAuthenticated();
 
-    // Rotas públicas que não precisam redirecionamento
     const publicRoutes = ['/', '/register', '/confirm-email'];
-
-    // ⚠️ Verifica se a URL atual é pública
+    const currentUrl = this.router.url;
     const isPublic = publicRoutes.some(route => currentUrl.startsWith(route));
 
-    if (isPublic) {
-      return; // ✅ Deixa o Angular seguir normalmente
+    if (isLogged && !isPublic) {
+      // ✅ Está logado e já está em rota protegida — não faz nada
+      return;
     }
-
-    const isLogged = await this.authService.isAuthenticated();
 
     if (isLogged) {
       this.router.navigate(['/home'], { replaceUrl: true });
     } else {
-      this.router.navigate([''], { replaceUrl: true });
+      this.router.navigate(['/'], { replaceUrl: true });
     }
   }
 }
