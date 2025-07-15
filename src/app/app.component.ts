@@ -22,17 +22,18 @@ export class AppComponent {
 
     const publicRoutes = ['/', '/register', '/confirm-email'];
     const currentUrl = this.router.url;
-    const isPublic = publicRoutes.some(route => currentUrl.includes(route));
-    
+    const isPublic = publicRoutes.some(route => currentUrl.startsWith(route));
 
     if (isLogged && !isPublic) {
-      // ✅ Está logado e já está em rota protegida — não faz nada
+      // ✅ Usuário está logado e já em rota protegida — não redireciona
       return;
     }
 
     if (isLogged) {
+      // ✅ Logado, mas em rota pública — redireciona para home
       this.router.navigate(['/home'], { replaceUrl: true });
     } else {
+      // ❌ Não logado — redireciona para login
       this.router.navigate(['/'], { replaceUrl: true });
     }
   }
