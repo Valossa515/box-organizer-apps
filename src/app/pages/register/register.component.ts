@@ -80,7 +80,7 @@ export class RegisterComponent {
     this.userService.createUser(payload)
       .then(() => {
         this.form.loading = false;
-        this.showToast('Usuário criado com sucesso! Pro favor faça a confirmação do seu e-mail.', 'success');
+        this.showToast('Usuário criado com sucesso! Por favor faça a confirmação do seu e-mail.', 'success');
         this.router.navigate(['']);
       })
       .catch(() => {
