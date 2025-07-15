@@ -8,7 +8,7 @@ import { Preferences } from '@capacitor/preferences';
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   async login(credentials: { email: string; password: string }): Promise<{ success: boolean; error?: string }> {
     try {
@@ -25,8 +25,13 @@ export class AuthService {
       } else {
         return { success: false, error: 'Login inválido' };
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.[0]?.description;
+
+      if (errorMessage?.toLowerCase().includes('e-mail') && errorMessage?.toLowerCase().includes('Confirmação')) {
+        return { success: false, error: 'Confirmação de e-mail pendente. Por favor, confirme seu e-mail para acessar o sistema.' };
+      }
+
       return { success: false, error: 'Usuário ou senha inválidos' };
     }
   }

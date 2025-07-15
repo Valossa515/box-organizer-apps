@@ -1,0 +1,19 @@
+<div class="email-confirmation">
+
+  <!-- Loading -->
+  <ng-container *ngIf="loading">
+    <p>Confirmando seu e‑mail...</p>
+    <mat-spinner diameter="48" strokeWidth="4"></mat-spinner>
+  </ng-container>
+
+  <!-- Resultado -->
+  <ng-container *ngIf="!loading">
+    <h2>{{ success ? 'E‑mail Confirmado!' : 'Erro ao Confirmar' }}</h2>
+    <p>{{ message }}</p>
+
+    <p *ngIf="success">
+      Você pode fechar esta aba e voltar ao aplicativo para fazer login.
+    </p>
+  </ng-container>
+
+</div>

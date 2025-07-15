@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { LoginForm } from '../../models/login-form.model';
 import { AuthService } from '../../../services/auth.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +36,8 @@ export class LoginComponent {
   constructor(
     private router: Router,
     private authService: AuthService,
-  ) {}
+    private snackBar: MatSnackBar
+  ) { }
 
   async login(event: Event) {
     event.preventDefault();
@@ -51,6 +53,7 @@ export class LoginComponent {
       this.router.navigateByUrl('/home');
     } else {
       this.form.error = result.error || 'Erro desconhecido';
+      this.showToast("Erro ao fazer login. E-mail ainda não verificado.", 'error');
     }
 
     this.form.loading = false;
@@ -58,5 +61,14 @@ export class LoginComponent {
 
   async register() {
     this.router.navigateByUrl('/register');
+  }
+
+  private showToast(message: string, type: 'success' | 'error' | 'warning' = 'warning'): void {
+    this.snackBar.open(message, 'Fechar', {
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: [`${type}-toast`]
+    });
   }
 }

@@ -18,6 +18,18 @@ export class AppComponent {
   }
 
   async initializeApp() {
+    const currentUrl = this.router.url;
+
+    // Rotas públicas que não precisam redirecionamento
+    const publicRoutes = ['/', '/register', '/confirm-email'];
+
+    // ⚠️ Verifica se a URL atual é pública
+    const isPublic = publicRoutes.some(route => currentUrl.startsWith(route));
+
+    if (isPublic) {
+      return; // ✅ Deixa o Angular seguir normalmente
+    }
+
     const isLogged = await this.authService.isAuthenticated();
 
     if (isLogged) {

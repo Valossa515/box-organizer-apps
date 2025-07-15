@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-register',
@@ -38,7 +39,8 @@ export class RegisterComponent {
   constructor(
     private userService: UserService,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) { }
 
   register() {
@@ -78,11 +80,21 @@ export class RegisterComponent {
     this.userService.createUser(payload)
       .then(() => {
         this.form.loading = false;
-        this.router.navigate(['']); // Redireciona se sucesso
+        this.showToast('Usuário criado com sucesso! Pro favor faça a confirmação do seu e-mail.', 'success');
+        this.router.navigate(['']);
       })
       .catch(() => {
         this.form.loading = false;
         this.form.error = 'Nome inválido ou já está em uso. Por favor, tente outro.';
       });
+  }
+
+   private showToast(message: string, type: 'success' | 'error' | 'warning' = 'warning'): void {
+    this.snackBar.open(message, 'Fechar', {
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: [`${type}-toast`]
+    });
   }
 }

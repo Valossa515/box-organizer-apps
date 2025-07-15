@@ -1,0 +1,28 @@
+.email-confirmation {
+  max-width: 500px;
+  margin: 3rem auto;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  background: #f9f9f9;
+
+  h2 {
+    margin-bottom: 1rem;
+  }
+
+  mat-spinner {
+    width: 24px !important;
+    height: 24px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem auto;
+
+    svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+  }
+}
