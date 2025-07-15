@@ -46,8 +46,17 @@ export class AuthService {
   }
 
   async isAuthenticated(): Promise<boolean> {
-    const token = await this.getToken();
-    return !!token && !this.isTokenExpired(token);
+    try {
+      const token = await this.getToken();
+      if (!token) {
+        return false;
+      }
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('JWT payload:', payload); // 👀 veja o "aud"
+      return Date.now() < payload.exp * 1000;
+    } catch (e) {
+      return false;
+    }
   }
 
   isTokenExpired(token: string): boolean {
