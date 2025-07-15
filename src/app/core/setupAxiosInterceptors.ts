@@ -2,6 +2,13 @@ import axios from 'axios';
 import { Router } from '@angular/router';
 import { Preferences } from '@capacitor/preferences';
 
+declare global {
+  interface Window {
+    Capacitor?: any;
+    cordova?: any;
+  }
+}
+
 export function setupAxiosInterceptors(router: Router) {
   axios.interceptors.request.use(async config => {
     const url = config.url ?? '';
@@ -9,6 +16,10 @@ export function setupAxiosInterceptors(router: Router) {
     const isRegister = url.includes('/users/v1/create');
     const isConfirmEmail = url.includes('/users/v1/confirm-email');
 
+    const isMobile = window?.Capacitor?.isNativePlatform?.() || window?.cordova;
+
+    config.headers['X-Client-Type'] = isMobile ? 'mobile' : 'web';
+    
     // ✅ Permite requisições públicas
     if (isLogin || isRegister || isConfirmEmail) {
       return config;
