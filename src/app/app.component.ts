@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+8import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -22,7 +22,8 @@ export class AppComponent {
 
     const publicRoutes = ['/', '/register', '/confirm-email'];
     const currentUrl = this.router.url;
-    const isPublic = publicRoutes.some(route => currentUrl.startsWith(route));
+    const isPublic = publicRoutes.some(route => currentUrl.includes(route));
+    
 
     if (isLogged && !isPublic) {
       // ✅ Está logado e já está em rota protegida — não faz nada
