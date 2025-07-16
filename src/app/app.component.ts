@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
+
+// app component
 @Component({
   selector: 'app-root',
   standalone: true,
