@@ -1,9 +1,8 @@
+// app.component.ts
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-
-// app component
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -20,23 +19,23 @@ export class AppComponent {
   }
 
   async initializeApp() {
-    const isLogged = await this.authService.isAuthenticated();
-
     const publicRoutes = ['/', '/register', '/confirm-email'];
     const currentUrl = this.router.url;
     const isPublic = publicRoutes.some(route => currentUrl.startsWith(route));
 
-    if (isLogged && !isPublic) {
-      // ✅ Usuário está logado e já em rota protegida — não redireciona
+    if (isPublic) {
+      // ✅ Rota pública: não redireciona nunca
       return;
     }
 
+    const isLogged = await this.authService.isAuthenticated();
+
     if (isLogged) {
-      // ✅ Logado, mas em rota pública — redireciona para home
-      this.router.navigate(['/home'], { replaceUrl: true });
-    } else {
-      // ❌ Não logado — redireciona para login
-      this.router.navigate(['/'], { replaceUrl: true });
+      // ✅ Logado e em rota protegida: tudo certo
+      return;
     }
+
+    // ❌ Não logado e em rota protegida — redireciona para login
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 }
