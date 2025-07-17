@@ -19,23 +19,33 @@ export class AppComponent {
   }
 
   async initializeApp() {
-    const publicRoutes = ['/', '/register', '/confirm-email'];
     const currentUrl = this.router.url;
-    const isPublic = publicRoutes.some(route => currentUrl.startsWith(route));
 
-    if (isPublic) {
-      // ✅ Rota pública: não redireciona nunca
-      return;
-    }
-
+    // Se já está logado, redireciona para /home, exceto se já estiver em rota protegida
     const isLogged = await this.authService.isAuthenticated();
 
     if (isLogged) {
-      // ✅ Logado e em rota protegida: tudo certo
+      const isAlreadyInProtectedRoute = !['/', '/register', '/confirm-email'].some(route =>
+        currentUrl.startsWith(route)
+      );
+
+      if (!isAlreadyInProtectedRoute) {
+        this.router.navigate(['/home'], { replaceUrl: true });
+      }
+
       return;
     }
 
-    // ❌ Não logado e em rota protegida — redireciona para login
+    // Se não está logado e está em rota pública, deixa seguir
+    const isPublic = ['/', '/register', '/confirm-email'].some(route =>
+      currentUrl.startsWith(route)
+    );
+
+    if (isPublic) {
+      return;
+    }
+
+    // Não está logado e está em rota protegida → redireciona para login
     this.router.navigate(['/'], { replaceUrl: true });
   }
 }
