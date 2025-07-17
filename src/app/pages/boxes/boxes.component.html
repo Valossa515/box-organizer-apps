@@ -65,8 +65,8 @@
             Formatos suportados: JPG, PNG (Max. 5MB)
           </div>
         </div>
-        <div *ngIf="imagePreviewUrl" class="image-preview">
-          <img [src]="imagePreviewUrl" alt="Preview da imagem" />
+        <div *ngIf="imagePreviewUrl || !selectedImageFile" class="image-preview">
+          <img [src]="imagePreviewUrl  || 'assets/default-box-image.jpeg'" alt="Preview da imagem" />
           <button (click)="removeImage()" class="remove-image">
             <mat-icon>close</mat-icon>
           </button>
@@ -107,7 +107,7 @@
       <div class="box-content">
         <div class="box-image">
           <img
-            [src]="box.imgUrl"
+            [src]="box.imgUrl || 'assets/default-box-image.jpeg'"
             [alt]="box.name"
             (error)="handleImgError($event)"
           />

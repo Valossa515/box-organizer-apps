@@ -108,7 +108,7 @@ export class BoxesComponent implements OnInit {
   }
 
   handleImgError(event: any): void {
-    event.target.src = 'assets/default-box-image.jpg'; // Fallback image
+    event.target.src = 'assets/default-box-image.jpeg'; // Fallback image
   }
 
   onSearchChange(name: string): void {
