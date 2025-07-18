@@ -59,7 +59,6 @@ export class BoxesComponent implements OnInit {
         this.boxes = result.data;
         this.totalRecords = result.totalRecords; // <- ESSENCIAL
         this.loading = false;
-        console.log('Caixas carregadas com sucesso', this.boxes);
       })
       .catch((error) => {
         console.error('Erro ao buscar caixas', error);

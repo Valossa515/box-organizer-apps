@@ -52,7 +52,6 @@ export class AuthService {
         return false;
       }
       const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log('JWT payload:', payload); // 👀 veja o "aud"
       return Date.now() < payload.exp * 1000;
     } catch (e) {
       return false;
