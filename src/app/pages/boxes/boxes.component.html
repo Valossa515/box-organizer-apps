@@ -1,7 +1,13 @@
-<!-- boxes.component.html -->
 <div class="boxes-container">
-  <h2>Minhas Caixas</h2>
+  <h2>Minhas Caixas e Itens</h2>
 
+  <!-- Seletor de tipo -->
+  <mat-button-toggle-group [(ngModel)]="tipoSelecionado" exclusive>
+    <mat-button-toggle value="caixa">Caixas</mat-button-toggle>
+    <mat-button-toggle value="item">Itens</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <!-- Barra de busca -->
   <div class="search-bar">
     <div class="search-container">
       <mat-icon class="search-icon">search</mat-icon>
@@ -9,32 +15,28 @@
         type="text"
         [(ngModel)]="searchName"
         (ngModelChange)="onSearchChange($event)"
-        placeholder="Pesquisar caixas..."
+        placeholder="Pesquisar por nome..."
       />
       <button class="clear-search" (click)="clearSearch()" *ngIf="searchName">
         <mat-icon>clear</mat-icon>
       </button>
     </div>
 
-    <div class="pagination-controls" *ngIf="!searchName && totalPages > 0">
-      <button
-        [disabled]="currentPage === 1"
-        (click)="goToPage(currentPage - 1)"
-      >
+    <!-- Paginação só para caixas -->
+    <div class="pagination-controls" *ngIf="tipoSelecionado === 'caixa' && !searchName && totalPages > 0">
+      <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
         <mat-icon>chevron_left</mat-icon>
       </button>
 
       <span>Página {{ currentPage }} de {{ totalPages }}</span>
 
-      <button
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(currentPage + 1)"
-      >
+      <button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
   </div>
 
+  <!-- Formulário de nova caixa -->
   <div *ngIf="showAddForm" class="add-form">
     <div class="form-fields-container">
       <input
@@ -51,83 +53,80 @@
     </div>
 
     <div class="image-upload">
-      <label
-        class="upload-area"
-        [class.has-image]="imagePreviewUrl"
-        for="box-image"
-      >
+      <label class="upload-area" [class.has-image]="imagePreviewUrl" for="box-image">
         <div *ngIf="!imagePreviewUrl" class="upload-content">
           <mat-icon>cloud_upload</mat-icon>
           <div class="upload-text">
             Arraste ou <span>selecione uma imagem</span>
           </div>
-          <div class="upload-hint">
-            Formatos suportados: JPG, PNG (Max. 5MB)
-          </div>
+          <div class="upload-hint">Formatos suportados: JPG, PNG (Max. 5MB)</div>
         </div>
         <div *ngIf="imagePreviewUrl || !selectedImageFile" class="image-preview">
-          <img [src]="imagePreviewUrl  || 'assets/default-box-image.jpeg'" alt="Preview da imagem" />
+          <img [src]="imagePreviewUrl || 'assets/default-box-image.jpeg'" alt="Preview da imagem" />
           <button (click)="removeImage()" class="remove-image">
             <mat-icon>close</mat-icon>
           </button>
         </div>
       </label>
-      <input
-        id="box-image"
-        type="file"
-        accept="image/*"
-        (change)="handleBoxImage($event)"
-      />
+      <input id="box-image" type="file" accept="image/*" (change)="handleBoxImage($event)" />
     </div>
 
     <div class="form-actions">
       <button class="modern-button primary" (click)="createBox()">
         <mat-icon>check</mat-icon> Salvar Caixa
       </button>
-      <button
-        class="modern-button secondary"
-        (click)="showAddForm = false; resetForm()"
-      >
+      <button class="modern-button secondary" (click)="showAddForm = false; resetForm()">
         <mat-icon>close</mat-icon> Cancelar
       </button>
     </div>
   </div>
 
+  <!-- Indicador de carregamento -->
   <div *ngIf="loading" class="loading-indicator">
     <mat-spinner diameter="40"></mat-spinner>
-    <span>Carregando suas caixas...</span>
+    <span>Carregando...</span>
   </div>
 
-  <div class="box-grid">
-    <mat-card
-      class="box-card"
-      *ngFor="let box of boxes"
-      (click)="goToItems(box.id)"
-    >
+  <!-- Grid de Caixas -->
+  <div class="box-grid" *ngIf="tipoSelecionado === 'caixa'">
+    <mat-card class="box-card" *ngFor="let box of boxes" (click)="goToItems(box.id)">
       <div class="box-content">
         <div class="box-image">
-          <img
-            [src]="box.imgUrl || 'assets/default-box-image.jpeg'"
-            [alt]="box.name"
-            (error)="handleImgError($event)"
-          />
+          <img [src]="box.imgUrl || 'assets/default-box-image.jpeg'" [alt]="box.name" (error)="handleImgError($event)" />
         </div>
         <div class="box-info">
           <div class="box-header">
             <mat-icon class="box-icon">inventory_2</mat-icon>
             <h3>{{ box.name }}</h3>
           </div>
-          <p class="description">{{ box.description || "Sem descrição" }}</p>
+          <p class="description">{{ box.description || 'Sem descrição' }}</p>
         </div>
       </div>
     </mat-card>
   </div>
 
-  <button
-    class="fab-button"
-    (click)="showAddForm = true"
-    matTooltip="Adicionar caixa"
-  >
+  <!-- Grid de Itens -->
+  <div class="box-grid" *ngIf="tipoSelecionado === 'item'">
+    <mat-card class="box-card" *ngFor="let item of items">
+      <div class="box-content">
+        <div class="box-image">
+          <img [src]="item.imgUrl || 'assets/default-box-image.jpeg'" [alt]="item.name" (error)="handleImgError($event)" />
+        </div>
+        <div class="box-info">
+          <div class="box-header">
+            <mat-icon class="box-icon">inventory</mat-icon>
+            <h3>{{ item.name }}</h3>
+          </div>
+          <p class="description">{{ item.description || 'Sem descrição' }}</p>
+          <p class="quantity">Quantidade: {{ item.quantity }}</p>
+          <small>Caixa: {{ item.boxName }}</small>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Botão Flutuante -->
+  <button class="fab-button" (click)="showAddForm = true" matTooltip="Adicionar caixa">
     <mat-icon>add</mat-icon>
   </button>
 </div>

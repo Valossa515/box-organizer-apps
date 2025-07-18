@@ -10,6 +10,10 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { ItemModel } from '../../models/item-model';
+import { ItemService } from '../../../services/item.service';
+
 
 @Component({
   selector: 'app-boxes',
@@ -22,12 +26,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     FormsModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './boxes.component.html',
-  styleUrl: './boxes.component.scss'
+  styleUrl: './boxes.component.scss',
 })
 export class BoxesComponent implements OnInit {
   boxes: BoxModel[] = [];
+  items: ItemModel[] = [];
   loading = false;
   showAddForm = false;
 
@@ -35,7 +41,7 @@ export class BoxesComponent implements OnInit {
     id: '',
     name: '',
     description: '',
-    imgUrl: ''
+    imgUrl: '',
   };
 
   selectedImageFile: File | null = null;
@@ -46,7 +52,14 @@ export class BoxesComponent implements OnInit {
   searchName: string = '';
   totalRecords = 0;
 
-  constructor(private boxService: BoxService, private router: Router, private snackBar: MatSnackBar) { }
+  tipoSelecionado: 'caixa' | 'item' = 'caixa';
+
+  constructor(
+    private boxService: BoxService,
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private itemService: ItemService
+  ) {}
 
   ngOnInit() {
     this.loadBoxes();
@@ -54,10 +67,11 @@ export class BoxesComponent implements OnInit {
 
   loadBoxes() {
     this.loading = true;
-    this.boxService.getBoxes(this.currentPage, this.pageSize)
+    this.boxService
+      .getBoxes(this.currentPage, this.pageSize)
       .then((result) => {
         this.boxes = result.data;
-        this.totalRecords = result.totalRecords; // <- ESSENCIAL
+        this.totalRecords = result.totalRecords;
         this.loading = false;
       })
       .catch((error) => {
@@ -67,13 +81,14 @@ export class BoxesComponent implements OnInit {
   }
 
   createBox() {
-    this.boxService.createBox(this.newBox, this.selectedImageFile ?? undefined)
+    this.boxService
+      .createBox(this.newBox, this.selectedImageFile ?? undefined)
       .then(() => {
         this.showAddForm = false;
         this.resetForm();
         this.loadBoxes();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Erro ao criar caixa', error);
       });
   }
@@ -82,7 +97,6 @@ export class BoxesComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.selectedImageFile = file;
-
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreviewUrl = e.target.result;
@@ -107,54 +121,80 @@ export class BoxesComponent implements OnInit {
   }
 
   handleImgError(event: any): void {
-    event.target.src = 'assets/default-box-image.jpeg'; // Fallback image
+    event.target.src = 'assets/default-box-image.jpeg';
   }
 
   onSearchChange(name: string): void {
     clearTimeout(this.searchTimeout);
-
     this.searchTimeout = setTimeout(() => {
       if (!name.trim()) {
-        this.loadBoxes();
+        this.items = [];
+        this.searchName = '';
+        this.tipoSelecionado === 'caixa' ? this.loadBoxes() : (this.items = []);
         return;
       }
 
-      this.searchByName(name);
+      if (this.tipoSelecionado === 'caixa') {
+        this.searchBoxByName(name);
+      } else {
+        this.searchItemByName(name);
+      }
     }, 400);
   }
 
-  searchByName(name: string): void {
-
+  searchBoxByName(name: string): void {
     if (!name || !name.trim()) {
       this.showToast('Por favor, digite um nome para buscar');
       return;
     }
     this.loading = true;
-
-    this.boxService.getBoxByName(name)
-      .then(items => {
-        this.boxes = items;
+    this.boxService
+      .getBoxByName(name)
+      .then((boxes) => {
+        this.boxes = boxes;
         this.loading = false;
       })
-      .catch(err => {
-        console.error('Erro ao buscar item por nome', err);
+      .catch((err) => {
+        console.error('Erro ao buscar caixa por nome', err);
         this.boxes = [];
         this.loading = false;
       });
   }
+
+  searchItemByName(name: string): void {
+  if (!name || !name.trim()) {
+    this.showToast('Por favor, digite um nome para buscar');
+    return;
+  }
+  this.loading = true;
+  this.itemService
+    .getItemByName(name) // ✅ Agora está correto
+    .then((items) => {
+      this.items = items;
+      this.loading = false;
+    })
+    .catch((err) => {
+      console.error('Erro ao buscar item por nome', err);
+      this.items = [];
+      this.loading = false;
+    });
+}
 
   private showToast(message: string, type: 'success' | 'error' | 'warning' = 'warning'): void {
     this.snackBar.open(message, 'Fechar', {
       duration: 3000,
       horizontalPosition: 'right',
       verticalPosition: 'top',
-      panelClass: [`${type}-toast`]
+      panelClass: [`${type}-toast`],
     });
   }
 
   clearSearch(): void {
     this.searchName = '';
-    this.loadBoxes();
+    this.items = [];
+    if (this.tipoSelecionado === 'caixa') {
+      this.loadBoxes();
+    }
   }
 
   get totalPages(): number {
