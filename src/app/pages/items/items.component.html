@@ -112,9 +112,9 @@
             (change)="handleAddImage($event)"
             accept="image/*"
           />
-          <div *ngIf="newItem.imgUrl" class="image-preview">
+          <div class="image-preview">
             <img
-              [src]="newItem.imgUrl || 'assets/default-item-image.jpeg'"
+              [src]="getImageUrl(newItem.imgUrl)"
               alt="Preview"
             />
             <button class="remove-image" (click)="newItem.imgUrl = ''">
@@ -178,9 +178,9 @@
 
           <!-- Corpo do card -->
           <div class="card-body">
-            <div *ngIf="item.imgUrl" class="item-image">
+            <div class="item-image">
               <img
-                [src]="item.imgUrl || 'assets/default-item-image.jpeg'"
+                [src]="getImageUrl(item.imgUrl)"
                 alt="{{ item.name }}"
                 (error)="handleImgError($event)"
               />
