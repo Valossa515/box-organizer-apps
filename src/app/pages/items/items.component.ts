@@ -269,6 +269,10 @@ export class ItemsComponent implements OnInit {
       });
   }
 
+  handleImgError(event: any): void {
+    event.target.src = 'assets/default-item-image.jpeg';
+  }
+
   private showToast(message: string, type: 'success' | 'error' | 'warning' = 'warning'): void {
     this.snackBar.open(message, 'Fechar', {
       duration: 3000,
