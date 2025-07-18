@@ -36,16 +36,17 @@ export class AppComponent {
       return;
     }
 
-    // Se não está logado e está em rota pública, deixa seguir
-    const isPublic = ['/', '/register', '/confirm-email'].some(route =>
+    const isPublicRoute = ['/', '/register', '/confirm-email'].some(route =>
       currentUrl.startsWith(route)
     );
 
-    if (isPublic) {
+    if (isLogged && !isPublicRoute) {
       return;
     }
 
-    // Não está logado e está em rota protegida → redireciona para login
-    this.router.navigate(['/'], { replaceUrl: true });
+    if (isLogged && isPublicRoute) {
+      this.router.navigate(['/home'], { replaceUrl: true });
+      return;
+    }
   }
 }
