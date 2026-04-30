@@ -4,6 +4,7 @@ import { BoxModel, BoxOrderBy, SortDirection } from '../app/models/box-model';
 import { environment } from '../environments/environment';
 import { PagedResult } from '../app/models/paged-result.model';
 import { ApiResponse } from '../app/models/api-response.model';
+import { sanitizeIdentifier, sanitizeSearchTerm } from '../app/core/security/input-sanitizer';
 
 function unwrap<T>(envelope: ApiResponse<T>): T {
   if (!envelope || !envelope.success) {
@@ -29,7 +30,8 @@ export class BoxService {
   }
 
   async getBoxById(id: string): Promise<BoxModel> {
-    const res = await axios.get<ApiResponse<BoxModel>>(`${environment.apiUrl}/box/v1/${id}`);
+    const safeId = sanitizeIdentifier(id);
+    const res = await axios.get<ApiResponse<BoxModel>>(`${environment.apiUrl}/box/v1/${safeId}`);
     return unwrap(res.data);
   }
 
@@ -47,13 +49,14 @@ export class BoxService {
   }
 
   async updateBox(box: BoxModel, imageFile?: File): Promise<BoxModel> {
+    const safeId = sanitizeIdentifier(box.id);
     const formData = new FormData();
     formData.append('name', box.name);
     formData.append('description', box.description ?? '');
     if (imageFile) formData.append('image', imageFile, imageFile.name);
 
     const res = await axios.put<ApiResponse<BoxModel>>(
-      `${environment.apiUrl}/box/v1/update/${box.id}`,
+      `${environment.apiUrl}/box/v1/update/${safeId}`,
       formData
     );
     return unwrap(res.data);
@@ -65,25 +68,29 @@ export class BoxService {
     fields: { name?: string; description?: string },
     imageFile?: File
   ): Promise<BoxModel> {
+    const safeId = sanitizeIdentifier(id);
     const formData = new FormData();
     if (fields.name !== undefined) formData.append('name', fields.name);
     if (fields.description !== undefined) formData.append('description', fields.description);
     if (imageFile) formData.append('image', imageFile, imageFile.name);
 
     const res = await axios.patch<ApiResponse<BoxModel>>(
-      `${environment.apiUrl}/box/v1/update/${id}`,
+      `${environment.apiUrl}/box/v1/update/${safeId}`,
       formData
     );
     return unwrap(res.data);
   }
 
   async deleteBox(id: string): Promise<void> {
-    await axios.delete(`${environment.apiUrl}/box/v1/delete/${id}`);
+    const safeId = sanitizeIdentifier(id);
+    await axios.delete(`${environment.apiUrl}/box/v1/delete/${safeId}`);
   }
 
   async getBoxByName(name: string): Promise<BoxModel[]> {
+    const safeName = sanitizeSearchTerm(name);
+    if (!safeName) return [];
     const res = await axios.get<ApiResponse<BoxModel[]>>(
-      `${environment.apiUrl}/box/v1/by-name/${encodeURIComponent(name)}`
+      `${environment.apiUrl}/box/v1/by-name/${encodeURIComponent(safeName)}`
     );
     return unwrap(res.data);
   }

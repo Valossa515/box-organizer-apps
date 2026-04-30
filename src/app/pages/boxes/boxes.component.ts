@@ -13,6 +13,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ItemModel } from '../../models/item-model';
 import { ItemService } from '../../../services/item.service';
+import {
+  containsSuspiciousPattern,
+  sanitizeSearchTerm,
+  sanitizeText
+} from '../../core/security/input-sanitizer';
+import { validateImageFile } from '../../core/security/file-validator';
 
 
 @Component({
@@ -80,29 +86,61 @@ export class BoxesComponent implements OnInit {
       });
   }
 
-  createBox() {
-    this.boxService
-      .createBox(this.newBox, this.selectedImageFile ?? undefined)
-      .then(() => {
-        this.showAddForm = false;
-        this.resetForm();
-        this.loadBoxes();
-      })
-      .catch((error) => {
-        console.error('Erro ao criar caixa', error);
-      });
+  async createBox() {
+    const name = sanitizeText(this.newBox.name, { maxLength: 100 });
+    const description = sanitizeText(this.newBox.description, { maxLength: 1000, multiline: true });
+
+    if (!name) {
+      this.showToast('O nome da caixa é obrigatório', 'error');
+      return;
+    }
+    if (containsSuspiciousPattern(name) || containsSuspiciousPattern(description)) {
+      this.showToast('Conteúdo inválido detectado nos campos.', 'error');
+      return;
+    }
+
+    if (this.selectedImageFile) {
+      const result = await validateImageFile(this.selectedImageFile);
+      if (!result.ok) {
+        this.showToast(result.error ?? 'Imagem inválida.', 'error');
+        return;
+      }
+    }
+
+    this.newBox.name = name;
+    this.newBox.description = description;
+
+    try {
+      await this.boxService.createBox(this.newBox, this.selectedImageFile ?? undefined);
+      this.showAddForm = false;
+      this.resetForm();
+      this.loadBoxes();
+    } catch (error) {
+      console.error('Erro ao criar caixa', error);
+      this.showToast('Erro ao criar caixa', 'error');
+    }
   }
 
-  handleBoxImage(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedImageFile = file;
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imagePreviewUrl = e.target.result;
-      };
-      reader.readAsDataURL(file);
+  async handleBoxImage(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const result = await validateImageFile(file);
+    if (!result.ok) {
+      input.value = '';
+      this.selectedImageFile = null;
+      this.imagePreviewUrl = '';
+      this.showToast(result.error ?? 'Imagem inválida.', 'error');
+      return;
     }
+
+    this.selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.imagePreviewUrl = String(e.target?.result ?? '');
+    };
+    reader.readAsDataURL(file);
   }
 
   removeImage(): void {
@@ -127,29 +165,32 @@ export class BoxesComponent implements OnInit {
   onSearchChange(name: string): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
-      if (!name.trim()) {
+      const sanitized = sanitizeSearchTerm(name);
+      this.searchName = sanitized;
+
+      if (!sanitized) {
         this.items = [];
-        this.searchName = '';
         this.tipoSelecionado === 'caixa' ? this.loadBoxes() : (this.items = []);
         return;
       }
 
       if (this.tipoSelecionado === 'caixa') {
-        this.searchBoxByName(name);
+        this.searchBoxByName(sanitized);
       } else {
-        this.searchItemByName(name);
+        this.searchItemByName(sanitized);
       }
     }, 400);
   }
 
   searchBoxByName(name: string): void {
-    if (!name || !name.trim()) {
-      this.showToast('Por favor, digite um nome para buscar');
+    const sanitized = sanitizeSearchTerm(name);
+    if (!sanitized) {
+      this.showToast('Por favor, digite um nome válido para buscar');
       return;
     }
     this.loading = true;
     this.boxService
-      .getBoxByName(name)
+      .getBoxByName(sanitized)
       .then((boxes) => {
         this.boxes = boxes;
         this.loading = false;
@@ -162,13 +203,14 @@ export class BoxesComponent implements OnInit {
   }
 
   searchItemByName(name: string): void {
-  if (!name || !name.trim()) {
-    this.showToast('Por favor, digite um nome para buscar');
+  const sanitized = sanitizeSearchTerm(name);
+  if (!sanitized) {
+    this.showToast('Por favor, digite um nome válido para buscar');
     return;
   }
   this.loading = true;
   this.itemService
-    .getItemByName(name) // ✅ Agora está correto
+    .getItemByName(sanitized) // ✅ Agora está correto
     .then((items) => {
       this.items = items;
       this.loading = false;

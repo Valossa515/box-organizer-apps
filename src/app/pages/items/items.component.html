@@ -39,6 +39,8 @@
         [(ngModel)]="searchName"
         (ngModelChange)="onSearchChange($event)"
         placeholder="Pesquisar itens..."
+        maxlength="100"
+        autocomplete="off"
       />
       <button class="clear-search" (click)="clearSearch()" *ngIf="searchName">
         <mat-icon>clear</mat-icon>
@@ -59,6 +61,8 @@
           [(ngModel)]="newItem.name"
           placeholder="Digite o nome do item"
           required
+          maxlength="100"
+          autocomplete="off"
           #nameInput="ngModel"
         />
         <div
@@ -75,6 +79,7 @@
           id="item-description"
           [(ngModel)]="newItem.description"
           placeholder="Digite a descrição do item"
+          maxlength="1000"
         ></textarea>
       </div>
 
@@ -85,6 +90,7 @@
           type="number"
           [(ngModel)]="newItem.quantity"
           min="1"
+          max="1000000"
           required
           #quantityInput="ngModel"
         />
@@ -238,6 +244,8 @@
                 [(ngModel)]="editItemModel.name"
                 placeholder="Nome do item"
                 required
+                maxlength="100"
+                autocomplete="off"
                 #editNameInput="ngModel"
               />
               <div
@@ -257,6 +265,7 @@
                 [(ngModel)]="editItemModel.description"
                 placeholder="Descrição do item"
                 required
+                maxlength="1000"
                 #editDescriptionInput="ngModel"
               ></textarea>
               <div
@@ -276,6 +285,7 @@
                 type="number"
                 [(ngModel)]="editItemModel.quantity"
                 min="1"
+                max="1000000"
                 required
                 #editQuantityInput="ngModel"
               />
