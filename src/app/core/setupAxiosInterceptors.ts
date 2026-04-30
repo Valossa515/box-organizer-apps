@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Router } from '@angular/router';
 import { Preferences } from '@capacitor/preferences';
+import { environment } from '../../environments/environment';
 
 declare global {
   interface Window {
@@ -9,32 +10,30 @@ declare global {
   }
 }
 
+const TOKEN_KEY = 'token';
+
 export function setupAxiosInterceptors(router: Router) {
   axios.interceptors.request.use(async config => {
     const url = config.url ?? '';
-    const isLogin = url.includes('/auth/v1/login');
-    const isRegister = url.includes('/users/v1/create');
-    const isConfirmEmail = url.includes('/users/v1/confirm-email');
+    const isCognito = url.includes('/oauth2/');
 
     const isMobile = window?.Capacitor?.isNativePlatform?.() || window?.cordova;
-
     config.headers['X-Client-Type'] = isMobile ? 'mobile' : 'web';
-    
-    // ✅ Permite requisições públicas
-    if (isLogin || isRegister || isConfirmEmail) {
-      return config;
-    }
 
-    const tokenResult = await Preferences.get({ key: 'token' });
+    // Requisições para o Cognito (token endpoint, etc.) não recebem nosso Bearer.
+    if (isCognito) return config;
+
+    // Apenas anexa o Bearer em chamadas para a API.
+    const isApiCall = url.startsWith(environment.apiUrl) || url.startsWith('/');
+    if (!isApiCall) return config;
+
+    const tokenResult = await Preferences.get({ key: TOKEN_KEY });
     const token = tokenResult.value;
 
-    if (!token) {
-      // ❌ Ignora redirecionamento automático aqui
-      return config; // <--- NÃO redireciona
-    }
+    if (!token) return config;
 
     if (isTokenExpired(token)) {
-      await Preferences.remove({ key: 'token' });
+      await Preferences.remove({ key: TOKEN_KEY });
       router.navigate(['/']);
       return Promise.reject(new Error('Token expirado'));
     }
@@ -46,12 +45,11 @@ export function setupAxiosInterceptors(router: Router) {
   axios.interceptors.response.use(
     response => response,
     async error => {
-      // Evita redirecionar em requisições públicas
       const url = error?.config?.url ?? '';
-      const isPublic = url.includes('/auth/v1/login') || url.includes('/users/v1/create') || url.includes('/users/v1/confirm-email');
+      const isCognito = url.includes('/oauth2/');
 
-      if (error.response?.status === 401 && !isPublic) {
-        await Preferences.remove({ key: 'token' });
+      if (error.response?.status === 401 && !isCognito) {
+        await Preferences.remove({ key: TOKEN_KEY });
         router.navigate(['/']);
       }
 
@@ -63,20 +61,8 @@ export function setupAxiosInterceptors(router: Router) {
 function isTokenExpired(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp;
-    return Date.now() >= exp * 1000;
-  } catch (e) {
+    return Date.now() >= payload.exp * 1000;
+  } catch {
     return true;
   }
-}
-
-let isHandlingTokenExpiration = false;
-
-async function handleTokenExpiration(router: Router): Promise<void> {
-  if (isHandlingTokenExpiration) return;
-  isHandlingTokenExpiration = true;
-
-  await Preferences.remove({ key: 'token' });
-  await router.navigate(['']);
-  isHandlingTokenExpiration = false;
 }

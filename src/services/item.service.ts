@@ -1,68 +1,62 @@
-import { PagedResult } from './../app/models/paged-result.model';
 import { Injectable } from '@angular/core';
 import axios from 'axios';
-import { ItemModel } from '../app/models/item-model';
+import { ItemModel, ItemOrderBy } from '../app/models/item-model';
+import { SortDirection } from '../app/models/box-model';
 import { environment } from '../environments/environment';
+import { PagedResult } from '../app/models/paged-result.model';
+import { ApiResponse } from '../app/models/api-response.model';
+
+function unwrap<T>(envelope: ApiResponse<T>): T {
+  if (!envelope || !envelope.success) {
+    throw new Error(envelope?.error ?? 'Erro na requisição');
+  }
+  return envelope.data as T;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ItemService {
 
-  async getItems(boxId: string, pageNumber = 1, pageSize = 10): Promise<PagedResult<ItemModel>> {
-  const res = await axios.get(`${environment.apiUrl}/items/v1`, {
-    params: {
-      BoxId: boxId,
-      Sort: 'desc',
-      OrderBy: 'quantity',
-      PageNumber: pageNumber,
-      PageSize: pageSize
-    }
-  });
-  return res.data;
-}
+  async getItems(
+    boxId: string,
+    pageNumber = 1,
+    pageSize = 10,
+    orderBy: ItemOrderBy = 'CREATED_AT',
+    sortDirection: SortDirection = 'DESC'
+  ): Promise<PagedResult<ItemModel>> {
+    const res = await axios.get<ApiResponse<PagedResult<ItemModel>>>(
+      `${environment.apiUrl}/items/v1`,
+      { params: { boxId, pageNumber, pageSize, orderBy, sortDirection } }
+    );
+    return unwrap(res.data);
+  }
 
   async createItem(item: ItemModel, imageFile?: File): Promise<ItemModel> {
     const formData = new FormData();
+    formData.append('name', item.name);
+    formData.append('description', item.description ?? '');
+    formData.append('quantity', String(item.quantity));
+    formData.append('boxId', item.boxId);
+    if (imageFile) formData.append('image', imageFile, imageFile.name);
 
-    // Adiciona cada campo individualmente ao FormData
-    formData.append('Name', item.name);
-    formData.append('Description', item.description || '');
-    formData.append('Quantity', item.quantity.toString());
-    formData.append('BoxId', item.boxId);
-
-    // Adiciona a imagem se existir
-    if (imageFile) {
-      formData.append('Image', imageFile, imageFile.name);
-    }
-
-    const res = await axios.post(`${environment.apiUrl}/items/v1/create`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return res.data;
+    const res = await axios.post<ApiResponse<ItemModel>>(
+      `${environment.apiUrl}/items/v1/create`,
+      formData
+    );
+    return unwrap(res.data);
   }
 
   async updateItem(item: ItemModel, imageFile?: File): Promise<ItemModel> {
     const formData = new FormData();
+    formData.append('name', item.name);
+    formData.append('description', item.description ?? '');
+    formData.append('quantity', String(item.quantity));
+    if (imageFile) formData.append('image', imageFile, imageFile.name);
 
-    // Adiciona cada campo individualmente
-    formData.append('Id', item.id);
-    formData.append('Name', item.name);
-    formData.append('Description', item.description || '');
-    formData.append('Quantity', item.quantity.toString());
-    formData.append('BoxId', item.boxId);
-
-    // Adiciona a imagem se existir
-    if (imageFile) {
-      formData.append('Image', imageFile, imageFile.name);
-    }
-
-    const res = await axios.put(`${environment.apiUrl}/items/v1/update/${item.id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return res.data;
+    const res = await axios.put<ApiResponse<ItemModel>>(
+      `${environment.apiUrl}/items/v1/update/${item.id}`,
+      formData
+    );
+    return unwrap(res.data);
   }
 
   async deleteItem(itemId: string): Promise<void> {
@@ -70,14 +64,31 @@ export class ItemService {
   }
 
   async getItemByName(name: string): Promise<ItemModel[]> {
-    const res = await axios.get<ItemModel[]>(`${environment.apiUrl}/items/v1/by-name/${name}`);
-    return res.data;
+    const res = await axios.get<ApiResponse<ItemModel[]>>(
+      `${environment.apiUrl}/items/v1/by-name/${encodeURIComponent(name)}`
+    );
+    return unwrap(res.data);
   }
 
-  async patchItem(itemId: string, quantity: number): Promise<void> {
-    const res = await axios.patch(`${environment.apiUrl}/items/v1/update/${itemId}`, {
-      quantity: quantity
-    });
-    return res.data;
+  /**
+   * PATCH parcial. Backend espera multipart; envia apenas os campos informados.
+   * Útil para alterar somente a quantidade.
+   */
+  async patchItem(
+    itemId: string,
+    fields: { name?: string; description?: string; quantity?: number },
+    imageFile?: File
+  ): Promise<ItemModel> {
+    const formData = new FormData();
+    if (fields.name !== undefined) formData.append('name', fields.name);
+    if (fields.description !== undefined) formData.append('description', fields.description);
+    if (fields.quantity !== undefined) formData.append('quantity', String(fields.quantity));
+    if (imageFile) formData.append('image', imageFile, imageFile.name);
+
+    const res = await axios.patch<ApiResponse<ItemModel>>(
+      `${environment.apiUrl}/items/v1/update/${itemId}`,
+      formData
+    );
+    return unwrap(res.data);
   }
 }

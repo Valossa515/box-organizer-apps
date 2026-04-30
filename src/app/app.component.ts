@@ -20,33 +20,13 @@ export class AppComponent {
 
   async initializeApp() {
     const currentUrl = this.router.url;
+    const publicRoutes = ['/', '/auth/callback'];
+    const isPublicRoute = publicRoutes.some(route => currentUrl === route || currentUrl.startsWith(route));
 
-    // Se já está logado, redireciona para /home, exceto se já estiver em rota protegida
     const isLogged = await this.authService.isAuthenticated();
 
-    if (isLogged) {
-      const isAlreadyInProtectedRoute = !['/', '/register', '/confirm-email'].some(route =>
-        currentUrl.startsWith(route)
-      );
-
-      if (!isAlreadyInProtectedRoute) {
-        this.router.navigate(['/home'], { replaceUrl: true });
-      }
-
-      return;
-    }
-
-    const isPublicRoute = ['/', '/register', '/confirm-email'].some(route =>
-      currentUrl.startsWith(route)
-    );
-
-    if (isLogged && !isPublicRoute) {
-      return;
-    }
-
-    if (isLogged && isPublicRoute) {
+    if (isLogged && isPublicRoute && !currentUrl.startsWith('/auth/callback')) {
       this.router.navigate(['/home'], { replaceUrl: true });
-      return;
     }
   }
 }

@@ -1,4 +1,4 @@
 export interface PagedResult<T> {
-  data: T[];
+  items: T[];
   totalRecords: number;
 }

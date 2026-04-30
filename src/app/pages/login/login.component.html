@@ -1,51 +1,30 @@
 <div class="login-container">
   <mat-card class="login-card">
-    <h2 class="login-title">Login</h2>
+    <h2 class="login-title">Box Organizer</h2>
+    <p class="subtitle">
+      Entre com sua conta para gerenciar suas caixas e itens.
+    </p>
 
-    <form (submit)="login($event)">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Email</mat-label>
-        <input
-          matInput
-          type="email"
-          [(ngModel)]="form.email"
-          name="email"
-          required
-        />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Senha</mat-label>
-        <input
-          matInput
-          type="password"
-          [(ngModel)]="form.password"
-          name="password"
-          required
-        />
-      </mat-form-field>
-
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="form.loading"
-        class="full-width"
-      >
-        {{ form.loading ? "Entrando..." : "Entrar" }}
-      </button>
-
-      <p *ngIf="form.error" class="error">{{ form.error }}</p>
-    </form>
+    <button
+      mat-raised-button
+      color="primary"
+      class="full-width"
+      (click)="signIn()"
+      [disabled]="loading"
+    >
+      {{ loading ? "Redirecionando..." : "Entrar" }}
+    </button>
 
     <button
       mat-stroked-button
       color="primary"
-      routerLink="/register"
       class="full-width"
-      (click)="register()"
+      (click)="signUp()"
+      [disabled]="loading"
     >
       Criar uma conta
     </button>
+
+    <p *ngIf="error" class="error">{{ error }}</p>
   </mat-card>
 </div>

@@ -70,7 +70,7 @@ export class BoxesComponent implements OnInit {
     this.boxService
       .getBoxes(this.currentPage, this.pageSize)
       .then((result) => {
-        this.boxes = result.data;
+        this.boxes = result.items;
         this.totalRecords = result.totalRecords;
         this.loading = false;
       })

@@ -60,9 +60,8 @@ export class ItemsComponent implements OnInit {
   }
 
   fetchBoxName(): void {
-    this.boxService.getBoxes(this.currentPage, this.pageSize)
-      .then(result => {
-        const box = result.data.find(b => b.id === this.boxId);
+    this.boxService.getBoxById(this.boxId)
+      .then(box => {
         if (box) {
           this.boxName = box.name;
         }
@@ -76,7 +75,7 @@ export class ItemsComponent implements OnInit {
     this.loading = true;
     this.itemService.getItems(this.boxId, this.currentPage, this.pageSize)
       .then(result => {
-        this.items = result.data;
+        this.items = result.items;
         this.totalRecords = result.totalRecords;
         this.loading = false;
       })
@@ -189,7 +188,7 @@ export class ItemsComponent implements OnInit {
       return;
     }
 
-    this.itemService.patchItem(item.id, newQuantity)
+    this.itemService.patchItem(item.id, { quantity: newQuantity })
       .then(() => item.quantity = newQuantity)
       .catch(err => console.error('Erro ao atualizar quantidade', err));
   }
