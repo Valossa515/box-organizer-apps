@@ -11,6 +11,12 @@ declare global {
 }
 
 const TOKEN_KEY = 'token';
+const REFRESH_KEY = 'refresh_token';
+
+async function clearTokens() {
+  await Preferences.remove({ key: TOKEN_KEY });
+  await Preferences.remove({ key: REFRESH_KEY });
+}
 
 export function setupAxiosInterceptors(router: Router) {
   axios.interceptors.request.use(async config => {
@@ -30,10 +36,14 @@ export function setupAxiosInterceptors(router: Router) {
     const tokenResult = await Preferences.get({ key: TOKEN_KEY });
     const token = tokenResult.value;
 
-    if (!token) return config;
+    // Bloqueia chamadas à API sem token — nunca enviar requisição anonima.
+    if (!token) {
+      router.navigate(['/']);
+      return Promise.reject(new Error('Não autenticado'));
+    }
 
     if (isTokenExpired(token)) {
-      await Preferences.remove({ key: TOKEN_KEY });
+      await clearTokens();
       router.navigate(['/']);
       return Promise.reject(new Error('Token expirado'));
     }
@@ -49,7 +59,7 @@ export function setupAxiosInterceptors(router: Router) {
       const isCognito = url.includes('/oauth2/');
 
       if (error.response?.status === 401 && !isCognito) {
-        await Preferences.remove({ key: TOKEN_KEY });
+        await clearTokens();
         router.navigate(['/']);
       }
 
