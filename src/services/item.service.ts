@@ -5,6 +5,7 @@ import { SortDirection } from '../app/models/box-model';
 import { environment } from '../environments/environment';
 import { PagedResult } from '../app/models/paged-result.model';
 import { ApiResponse } from '../app/models/api-response.model';
+import { sanitizeIdentifier, sanitizeSearchTerm } from '../app/core/security/input-sanitizer';
 
 function unwrap<T>(envelope: ApiResponse<T>): T {
   if (!envelope || !envelope.success) {
@@ -23,19 +24,21 @@ export class ItemService {
     orderBy: ItemOrderBy = 'CREATED_AT',
     sortDirection: SortDirection = 'DESC'
   ): Promise<PagedResult<ItemModel>> {
+    const safeBoxId = sanitizeIdentifier(boxId);
     const res = await axios.get<ApiResponse<PagedResult<ItemModel>>>(
       `${environment.apiUrl}/items/v1`,
-      { params: { boxId, pageNumber, pageSize, orderBy, sortDirection } }
+      { params: { boxId: safeBoxId, pageNumber, pageSize, orderBy, sortDirection } }
     );
     return unwrap(res.data);
   }
 
   async createItem(item: ItemModel, imageFile?: File): Promise<ItemModel> {
+    const safeBoxId = sanitizeIdentifier(item.boxId);
     const formData = new FormData();
     formData.append('name', item.name);
     formData.append('description', item.description ?? '');
     formData.append('quantity', String(item.quantity));
-    formData.append('boxId', item.boxId);
+    formData.append('boxId', safeBoxId);
     if (imageFile) formData.append('image', imageFile, imageFile.name);
 
     const res = await axios.post<ApiResponse<ItemModel>>(
@@ -46,6 +49,7 @@ export class ItemService {
   }
 
   async updateItem(item: ItemModel, imageFile?: File): Promise<ItemModel> {
+    const safeId = sanitizeIdentifier(item.id);
     const formData = new FormData();
     formData.append('name', item.name);
     formData.append('description', item.description ?? '');
@@ -53,19 +57,22 @@ export class ItemService {
     if (imageFile) formData.append('image', imageFile, imageFile.name);
 
     const res = await axios.put<ApiResponse<ItemModel>>(
-      `${environment.apiUrl}/items/v1/update/${item.id}`,
+      `${environment.apiUrl}/items/v1/update/${safeId}`,
       formData
     );
     return unwrap(res.data);
   }
 
   async deleteItem(itemId: string): Promise<void> {
-    await axios.delete(`${environment.apiUrl}/items/v1/delete/${itemId}`);
+    const safeId = sanitizeIdentifier(itemId);
+    await axios.delete(`${environment.apiUrl}/items/v1/delete/${safeId}`);
   }
 
   async getItemByName(name: string): Promise<ItemModel[]> {
+    const safeName = sanitizeSearchTerm(name);
+    if (!safeName) return [];
     const res = await axios.get<ApiResponse<ItemModel[]>>(
-      `${environment.apiUrl}/items/v1/by-name/${encodeURIComponent(name)}`
+      `${environment.apiUrl}/items/v1/by-name/${encodeURIComponent(safeName)}`
     );
     return unwrap(res.data);
   }
@@ -79,6 +86,7 @@ export class ItemService {
     fields: { name?: string; description?: string; quantity?: number },
     imageFile?: File
   ): Promise<ItemModel> {
+    const safeId = sanitizeIdentifier(itemId);
     const formData = new FormData();
     if (fields.name !== undefined) formData.append('name', fields.name);
     if (fields.description !== undefined) formData.append('description', fields.description);
@@ -86,7 +94,7 @@ export class ItemService {
     if (imageFile) formData.append('image', imageFile, imageFile.name);
 
     const res = await axios.patch<ApiResponse<ItemModel>>(
-      `${environment.apiUrl}/items/v1/update/${itemId}`,
+      `${environment.apiUrl}/items/v1/update/${safeId}`,
       formData
     );
     return unwrap(res.data);

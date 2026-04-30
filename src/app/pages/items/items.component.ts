@@ -10,6 +10,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { BoxService } from '../../../services/box.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {
+  containsSuspiciousPattern,
+  sanitizeSearchTerm,
+  sanitizeText
+} from '../../core/security/input-sanitizer';
+import { validateImageFile } from '../../core/security/file-validator';
 
 @Component({
   selector: 'app-items',
@@ -86,20 +92,37 @@ export class ItemsComponent implements OnInit {
   }
 
   async createItem(): Promise<void> {
-    // Validação mais robusta
-    if (!this.newItem.name?.trim()) {
+    // Saneamento + validação defensiva contra XSS/injeção.
+    const name = sanitizeText(this.newItem.name, { maxLength: 100 });
+    const description = sanitizeText(this.newItem.description, { maxLength: 1000, multiline: true });
+
+    if (!name) {
       this.showToast('O nome do item é obrigatório', 'error');
       return;
     }
-
-    if (!this.newItem.quantity || this.newItem.quantity <= 0) {
-      this.showToast('A quantidade deve ser maior que zero', 'error');
+    if (containsSuspiciousPattern(name) || containsSuspiciousPattern(description)) {
+      this.showToast('Conteúdo inválido detectado nos campos.', 'error');
       return;
     }
 
-    // Garantir que o boxId está definido
+    const quantity = Number(this.newItem.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 1_000_000) {
+      this.showToast('A quantidade deve ser um número entre 1 e 1.000.000', 'error');
+      return;
+    }
+
+    this.newItem.name = name;
+    this.newItem.description = description;
     this.newItem.boxId = this.boxId;
-    this.newItem.quantity = Number(this.newItem.quantity); // Garantir que é número
+    this.newItem.quantity = quantity;
+
+    if (this.selectedAddImage) {
+      const result = await validateImageFile(this.selectedAddImage);
+      if (!result.ok) {
+        this.showToast(result.error ?? 'Imagem inválida.', 'error');
+        return;
+      }
+    }
 
     try {
       const item = await this.itemService.createItem(this.newItem, this.selectedAddImage ?? undefined);
@@ -131,19 +154,35 @@ export class ItemsComponent implements OnInit {
   }
 
   async saveEdit(item: ItemModel): Promise<void> {
-    // Validação robusta
-    if (!this.editItemModel.name?.trim()) {
+    const name = sanitizeText(this.editItemModel.name, { maxLength: 100 });
+    const description = sanitizeText(this.editItemModel.description, { maxLength: 1000, multiline: true });
+
+    if (!name) {
       this.showToast('O nome do item é obrigatório', 'error');
       return;
     }
-
-    if (!this.editItemModel.quantity || this.editItemModel.quantity <= 0) {
-      this.showToast('A quantidade deve ser maior que zero', 'error');
+    if (containsSuspiciousPattern(name) || containsSuspiciousPattern(description)) {
+      this.showToast('Conteúdo inválido detectado nos campos.', 'error');
       return;
     }
 
-    // Garantir que os tipos estão corretos
-    this.editItemModel.quantity = Number(this.editItemModel.quantity);
+    const quantity = Number(this.editItemModel.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 1_000_000) {
+      this.showToast('A quantidade deve ser um número entre 1 e 1.000.000', 'error');
+      return;
+    }
+
+    this.editItemModel.name = name;
+    this.editItemModel.description = description;
+    this.editItemModel.quantity = quantity;
+
+    if (this.selectedEditImage) {
+      const result = await validateImageFile(this.selectedEditImage);
+      if (!result.ok) {
+        this.showToast(result.error ?? 'Imagem inválida.', 'error');
+        return;
+      }
+    }
 
     try {
       const updatedItem = await this.itemService.updateItem(this.editItemModel, this.selectedEditImage ?? undefined);
@@ -193,30 +232,44 @@ export class ItemsComponent implements OnInit {
       .catch(err => console.error('Erro ao atualizar quantidade', err));
   }
 
-  handleAddImage(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedAddImage = file;
-      // Cria uma URL temporária para pré-visualização
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.newItem.imgUrl = e.target.result;
-      };
-      reader.readAsDataURL(file);
+  async handleAddImage(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const result = await validateImageFile(file);
+    if (!result.ok) {
+      (event.target as HTMLInputElement).value = '';
+      this.selectedAddImage = null;
+      this.showToast(result.error ?? 'Imagem inválida.', 'error');
+      return;
     }
+
+    this.selectedAddImage = file;
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.newItem.imgUrl = String(e.target?.result ?? '');
+    };
+    reader.readAsDataURL(file);
   }
 
-  handleEditImage(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedEditImage = file;
-      // Cria uma URL temporária para pré-visualização
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.editItemModel.imgUrl = e.target.result;
-      };
-      reader.readAsDataURL(file);
+  async handleEditImage(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const result = await validateImageFile(file);
+    if (!result.ok) {
+      (event.target as HTMLInputElement).value = '';
+      this.selectedEditImage = null;
+      this.showToast(result.error ?? 'Imagem inválida.', 'error');
+      return;
     }
+
+    this.selectedEditImage = file;
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.editItemModel.imgUrl = String(e.target?.result ?? '');
+    };
+    reader.readAsDataURL(file);
   }
 
   resetForm(): void {
@@ -239,24 +292,25 @@ export class ItemsComponent implements OnInit {
     clearTimeout(this.searchTimeout);
 
     this.searchTimeout = setTimeout(() => {
-      if (!name.trim()) {
+      const sanitized = sanitizeSearchTerm(name);
+      this.searchName = sanitized;
+      if (!sanitized) {
         this.fetchItems();
         return;
       }
-
-      this.searchByName(name);
+      this.searchByName(sanitized);
     }, 400);
   }
 
   searchByName(name: string): void {
-
-    if (!name || !name.trim()) {
-      this.showToast('Por favor, digite um nome para buscar');
+    const sanitized = sanitizeSearchTerm(name);
+    if (!sanitized) {
+      this.showToast('Por favor, digite um nome válido para buscar');
       return;
     }
     this.loading = true;
 
-    this.itemService.getItemByName(name)
+    this.itemService.getItemByName(sanitized)
       .then(items => {
         this.items = items;
         this.loading = false;
@@ -273,7 +327,20 @@ export class ItemsComponent implements OnInit {
   }
 
   getImageUrl(url: string | null | undefined): string {
-    return url && url.trim() ? url : 'assets/default-item-image.jpeg';
+    const fallback = 'assets/default-item-image.jpeg';
+    if (!url) return fallback;
+    const trimmed = url.trim();
+    if (!trimmed) return fallback;
+
+    // Permite apenas esquemas seguros, evitando javascript:/vbscript:/file: etc.
+    if (/^(https?:|data:image\/(png|jpe?g|gif|webp);|blob:)/i.test(trimmed)) {
+      return trimmed;
+    }
+    // Caminhos relativos (ex.: "assets/...") tamb\u00e9m s\u00e3o aceitos.
+    if (/^[\w./-]+$/.test(trimmed) && !trimmed.includes('..')) {
+      return trimmed;
+    }
+    return fallback;
   }
 
   private showToast(message: string, type: 'success' | 'error' | 'warning' = 'warning'): void {

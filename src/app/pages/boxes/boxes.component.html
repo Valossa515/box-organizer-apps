@@ -16,6 +16,8 @@
         [(ngModel)]="searchName"
         (ngModelChange)="onSearchChange($event)"
         placeholder="Pesquisar por nome..."
+        maxlength="100"
+        autocomplete="off"
       />
       <button class="clear-search" (click)="clearSearch()" *ngIf="searchName">
         <mat-icon>clear</mat-icon>
@@ -44,11 +46,14 @@
         placeholder="Nome da caixa"
         [(ngModel)]="newBox.name"
         class="modern-input"
+        maxlength="100"
+        autocomplete="off"
       />
       <textarea
         placeholder="Descrição"
         [(ngModel)]="newBox.description"
         class="modern-textarea"
+        maxlength="1000"
       ></textarea>
     </div>
 
