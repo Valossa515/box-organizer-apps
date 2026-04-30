@@ -9,6 +9,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // <--- Adicione esta linha
 import { MatCardModule } from '@angular/material/card'; // <--- Adicione esta linha (você usa mat-card)
 import { MatIconModule } from '@angular/material/icon'; // <--- Adicione esta linha (você usa mat-icon)
+import { MatDialogModule } from '@angular/material/dialog';
 import { bootstrapApplication } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
@@ -20,7 +21,8 @@ export const appConfig: ApplicationConfig = {
       MatSnackBarModule,
       MatProgressSpinnerModule,
       MatCardModule,
-      MatIconModule
+      MatIconModule,
+      MatDialogModule
     )
   ]
 };
