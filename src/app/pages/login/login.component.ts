@@ -34,14 +34,6 @@ export class LoginComponent {
     }
   }
 
-  async signUp(): Promise<void> {
-    try {
-      await this.authService.register();
-    } catch {
-      this.showToast('Não foi possível abrir o cadastro', 'error');
-    }
-  }
-
   private showToast(message: string, type: 'success' | 'error' | 'warning' = 'warning'): void {
     this.snackBar.open(message, 'Fechar', {
       duration: 3000,
