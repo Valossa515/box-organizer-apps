@@ -4,6 +4,11 @@ import { Router } from '@angular/router';
 import { Preferences } from '@capacitor/preferences';
 import { environment } from '../../environments/environment';
 
+const BUILD_TAG = '2026-04-30-cors-rebuild';
+if (typeof window !== 'undefined') {
+  (window as any).__APP_BUILD_TAG__ = BUILD_TAG;
+}
+
 declare global {
   interface Window {
     Capacitor?: any;
