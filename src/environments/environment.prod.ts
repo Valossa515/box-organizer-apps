@@ -1,11 +1,16 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.boxorganizer.example.com',
+  // CloudFront na frente do EC2 boxorganizer-prod (HTTPS)
+  apiUrl: 'https://dllysr52rho4t.cloudfront.net',
   cognito: {
-    domain: 'boxorganizer.auth.us-east-1.amazoncognito.com',
-    clientId: 'boxorganizer-web',
-    redirectUri: 'https://app.boxorganizer.example.com/auth/callback',
-    logoutUri: 'https://app.boxorganizer.example.com/',
+    // TODO: pegar em AWS Console → Cognito → boxorganizer-prod → App integration → Domain → "Cognito domain"
+    // Formato: boxorganizer-prod-XXXXXXXX.auth.us-east-1.amazoncognito.com (sem https://)
+    domain: 'REPLACE_ME.auth.us-east-1.amazoncognito.com',
+    // TODO: pegar em AWS Console → Cognito → boxorganizer-prod → App integration → App client list → boxorganizer-prod-mobile → Client ID
+    // (use o client "mobile" — sem secret — porque SPA/PKCE não pode armazenar client secret)
+    clientId: 'REPLACE_ME',
+    redirectUri: 'https://box-organizer-apps.vercel.app/auth/callback',
+    logoutUri: 'https://box-organizer-apps.vercel.app/',
     scope: 'openid email profile'
   }
 };
