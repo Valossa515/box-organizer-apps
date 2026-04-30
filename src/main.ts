@@ -3,12 +3,17 @@ import { provideRouter, Router } from '@angular/router';
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { provideHttpClient } from '@angular/common/http';
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  inject,
+  provideAppInitializer
+} from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // <--- Adicione esta linha
-import { MatCardModule } from '@angular/material/card'; // <--- Adicione esta linha (você usa mat-card)
-import { MatIconModule } from '@angular/material/icon'; // <--- Adicione esta linha (você usa mat-icon)
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { bootstrapApplication } from '@angular/platform-browser';
 
@@ -17,6 +22,15 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     provideAnimations(),
+    // Install axios interceptors before any route guard runs. Without this,
+    // a direct navigation to a protected route (e.g. /home) on first load
+    // would trigger guards (AuthGuard → ConsentGuard) before the Bearer
+    // header is attached, causing spurious 401s and redirects to /login
+    // even for users with a valid stored token.
+    provideAppInitializer(() => {
+      const router = inject(Router);
+      setupAxiosInterceptors(router);
+    }),
     importProvidersFrom(
       MatSnackBarModule,
       MatProgressSpinnerModule,
@@ -27,7 +41,4 @@ export const appConfig: ApplicationConfig = {
   ]
 };
 
-bootstrapApplication(AppComponent, appConfig).then(appRef => {
-  const router = appRef.injector.get(Router);
-  setupAxiosInterceptors(router);
-}).catch(err => console.error(err));
+bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));
