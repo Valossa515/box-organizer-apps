@@ -15,16 +15,6 @@
       {{ loading ? "Redirecionando..." : "Entrar" }}
     </button>
 
-    <button
-      mat-stroked-button
-      color="primary"
-      class="full-width"
-      (click)="signUp()"
-      [disabled]="loading"
-    >
-      Criar uma conta
-    </button>
-
     <p *ngIf="error" class="error">{{ error }}</p>
   </mat-card>
 </div>
