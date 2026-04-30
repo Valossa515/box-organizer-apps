@@ -1,6 +1,11 @@
 <div class="home-container">
   <app-boxes></app-boxes>
   
+  <!-- Botão flutuante de Excluir Conta -->
+  <button class="fab-button delete-account-button" (click)="openDeleteAccount()" matTooltip="Excluir conta">
+    <mat-icon>delete_forever</mat-icon>
+  </button>
+
   <!-- Botão flutuante de Sair -->
   <button class="fab-button logout-button" (click)="logout()" matTooltip="Sair">
     <mat-icon>logout</mat-icon>
