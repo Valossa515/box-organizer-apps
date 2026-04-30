@@ -55,12 +55,11 @@ export class ItemsComponent implements OnInit {
 
   ngOnInit(): void {
     this.boxId = this.route.snapshot.params['boxId'];
-    this.fetchItems();
-    this.fetchBoxName();
+    this.fetchBoxName().then(() => this.fetchItems());
   }
 
-  fetchBoxName(): void {
-    this.boxService.getBoxById(this.boxId)
+  fetchBoxName(): Promise<void> {
+    return this.boxService.getBoxById(this.boxId)
       .then(box => {
         if (box) {
           this.boxName = box.name;
@@ -76,6 +75,7 @@ export class ItemsComponent implements OnInit {
     this.itemService.getItems(this.boxId, this.currentPage, this.pageSize)
       .then(result => {
         this.items = result.items;
+        this.items.forEach(item => item.boxName = this.boxName);
         this.totalRecords = result.totalRecords;
         this.loading = false;
       })

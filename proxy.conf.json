@@ -1,0 +1,32 @@
+{
+  "/consents": {
+    "target": "http://44.218.66.12",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/consent": {
+    "target": "http://44.218.66.12",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/box": {
+    "target": "http://44.218.66.12",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/item": {
+    "target": "http://44.218.66.12",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/me": {
+    "target": "http://44.218.66.12",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
