@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8081',
+  apiUrl: '',
   cognito: {
     domain: 'boxorganizer-prod-b74e1a70.auth.us-east-1.amazoncognito.com',
     clientId: '3obi6so9l80jn4nls2j81vsmja',
