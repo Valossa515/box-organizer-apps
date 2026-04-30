@@ -1,3 +1,4 @@
+// build-tag: 2026-04-30-cors-rebuild
 import axios from 'axios';
 import { Router } from '@angular/router';
 import { Preferences } from '@capacitor/preferences';
