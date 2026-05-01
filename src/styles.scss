@@ -56,11 +56,10 @@ html {
 }
 
 // ---- Dark mode tokens ----
-// Aplicado automaticamente quando o SO está em modo escuro.
-// Componentes legados que ainda usam variáveis SCSS locais ($primary, $card-bg,
-// etc.) NÃO trocam — só o que usa var(--app-*) ou os tokens do Material M3.
+// Aplicado quando o SO está em modo escuro OU o usuário escolheu "dark" no
+// toggle (ThemeService define data-theme="dark"|"light" no <html>).
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --app-color-text: #e6e6e6;
     --app-color-text-muted: #b8b8b8;
     --app-color-text-soft: #8a8a8a;
@@ -71,6 +70,23 @@ html {
     --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
     --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
   }
+}
+
+// Override manual via toggle (sobrepõe o media query).
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --app-color-text: #e6e6e6;
+  --app-color-text-muted: #b8b8b8;
+  --app-color-text-soft: #8a8a8a;
+  --app-color-bg: #121212;
+  --app-color-surface: #1e1e1e;
+  --app-color-border: #2c2c2c;
+  --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 html, body {

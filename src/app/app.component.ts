@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Capacitor, PluginListenerHandle } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -15,6 +16,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { Keyboard } from '@capacitor/keyboard';
 import { filter, Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { ThemeService } from '../services/theme.service';
 import { DeleteAccountModalComponent } from './pages/account/delete-account-modal.component';
 
 @Component({
@@ -28,7 +30,8 @@ import { DeleteAccountModalComponent } from './pages/account/delete-account-moda
     MatButtonModule,
     MatMenuModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -54,8 +57,10 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private zone: NgZone
+    private zone: NgZone,
+    public theme: ThemeService
   ) {
+    this.theme.init();
     this.initializeApp();
   }
 
@@ -138,13 +143,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private async setupNativeUi(): Promise<void> {
     try {
-      // Status bar adapta-se ao tema do SO (dark/light).
-      const prefersDark = typeof window !== 'undefined'
-        && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // Status bar acompanha o tema RESOLVIDO (system/light/dark) do ThemeService.
+      const isDark = this.theme.resolved() === 'dark';
 
-      await StatusBar.setStyle({ style: prefersDark ? Style.Light : Style.Dark });
+      await StatusBar.setStyle({ style: isDark ? Style.Light : Style.Dark });
       if (Capacitor.getPlatform() === 'android') {
-        await StatusBar.setBackgroundColor({ color: prefersDark ? '#121212' : '#1565c0' });
+        await StatusBar.setBackgroundColor({ color: isDark ? '#121212' : '#1565c0' });
         // overlaysWebView=false: a webview não ocupa a área da status bar.
         // Mantemos false para preservar o comportamento atual; o conteúdo já
         // respeita safe-area via env(safe-area-inset-*).
@@ -202,5 +206,22 @@ export class AppComponent implements OnInit, OnDestroy {
       maxWidth: '440px',
       autoFocus: 'first-tabbable'
     });
+  }
+
+  // Ícone exibido no botão de tema (reflete o modo escolhido).
+  themeIcon(): string {
+    switch (this.theme.mode()) {
+      case 'light': return 'light_mode';
+      case 'dark': return 'dark_mode';
+      default: return 'brightness_auto';
+    }
+  }
+
+  themeLabel(): string {
+    switch (this.theme.mode()) {
+      case 'light': return 'Claro';
+      case 'dark': return 'Escuro';
+      default: return 'Sistema';
+    }
   }
 }
