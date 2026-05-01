@@ -465,7 +465,7 @@ $spacing-xl: 32px;
       margin-bottom: $spacing-md;
       border-radius: $radius-sm;
       overflow: hidden;
-      background: #f0f0f0;
+      background: $background;
 
       img {
         width: 100%;
