@@ -1,7 +1,110 @@
 /* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// ---------------------------------------------------------------------------
+// Tema Material 3 (substitui o prebuilt azure-blue.css).
+// `mat.theme()` gera todas as CSS custom properties --mat-sys-* usadas pelos
+// componentes do Angular Material (toolbar, button, menu, dialog, etc.).
+// O scheme `light dark` faz o Material trocar tokens automaticamente conforme
+// `prefers-color-scheme` do sistema operacional.
+// ---------------------------------------------------------------------------
+html {
+  color-scheme: light dark;
+
+  @include mat.theme((
+    color: (
+      primary: mat.$blue-palette,
+      tertiary: mat.$green-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+:root {
+  // Safe-area insets (Capacitor / Android com viewport-fit=cover).
+  // Fallback para 0 em browsers/devices que não suportam env().
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+
+  // ---- Design tokens — modo claro (default) ----
+  --app-color-primary: #1976d2;
+  --app-color-primary-dark: #1565c0;
+  --app-color-accent: #4caf50;
+  --app-color-warn: #e53935;
+  --app-color-text: #333;
+  --app-color-text-muted: #555;
+  --app-color-text-soft: #777;
+  --app-color-bg: #f5f7fa;
+  --app-color-surface: #ffffff;
+  --app-color-border: #e0e0e0;
+
+  --app-radius-sm: 4px;
+  --app-radius-md: 8px;
+  --app-radius-lg: 12px;
+
+  --app-space-xs: 4px;
+  --app-space-sm: 8px;
+  --app-space-md: 16px;
+  --app-space-lg: 24px;
+  --app-space-xl: 32px;
+
+  --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+// ---- Dark mode tokens ----
+// Aplicado automaticamente quando o SO está em modo escuro.
+// Componentes legados que ainda usam variáveis SCSS locais ($primary, $card-bg,
+// etc.) NÃO trocam — só o que usa var(--app-*) ou os tokens do Material M3.
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-color-text: #e6e6e6;
+    --app-color-text-muted: #b8b8b8;
+    --app-color-text-soft: #8a8a8a;
+    --app-color-bg: #121212;
+    --app-color-surface: #1e1e1e;
+    --app-color-border: #2c2c2c;
+
+    --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  }
+}
+
+html, body {
+  height: 100%;
+  // Usa dynamic viewport quando disponível para evitar área cortada pela URL bar do Android.
+  min-height: 100dvh;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: var(--app-color-bg);
+  color: var(--app-color-text);
+}
+
+// Helpers utilitários para aplicar safe-area sem repetir env() por toda parte.
+.safe-area-inset-top    { padding-top: var(--safe-area-top); }
+.safe-area-inset-bottom { padding-bottom: var(--safe-area-bottom); }
+.safe-area-inset-x {
+  padding-left: var(--safe-area-left);
+  padding-right: var(--safe-area-right);
+}
+
+// Helper para mat-form-field ocupar 100% da largura disponível.
+.full-width { width: 100%; }
+
+// Respeita preferência do usuário por menos animações (a11y).
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* Estilos globais para os toasts */
 .mat-mdc-snack-bar-container {

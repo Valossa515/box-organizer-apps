@@ -1,1 +1,24 @@
+<ng-container *ngIf="showToolbar">
+  <mat-toolbar color="primary" class="app-toolbar">
+    <span class="app-title">Box Organizer</span>
+    <span class="toolbar-spacer"></span>
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="userMenu"
+      aria-label="Abrir menu da conta"
+    >
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Sair</span>
+      </button>
+      <button mat-menu-item (click)="openDeleteAccount()">
+        <mat-icon color="warn">delete_forever</mat-icon>
+        <span>Excluir minha conta</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+</ng-container>
 <router-outlet></router-outlet>

@@ -1,20 +1,20 @@
-$spacing-md: 16px;
-$spacing-lg: 24px;
-$card-bg: #f9f9f9;
-$border: #e0e0e0;
-// Variáveis de design
+// Variáveis de design (uso local; tokens globais em src/styles.scss --app-*).
 $primary: #1976d2;
 $primary-dark: #1565c0;
 $accent: #4caf50;
 $warn: #e53935;
-$text-dark: #333;
-$text-medium: #555;
-$text-light: #777;
-$background: #f5f7fa;
-$card-bg: #ffffff;
-$border: #e0e0e0;
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+// Cores temáticas — apontam para os tokens globais (var em src/styles.scss)
+// para reagir automaticamente ao prefers-color-scheme: dark.
+$text-dark: var(--app-color-text);
+$text-medium: var(--app-color-text-muted);
+$text-light: var(--app-color-text-soft);
+$background: var(--app-color-bg);
+$card-bg: var(--app-color-surface);
+$border: var(--app-color-border);
+$shadow-sm: var(--app-shadow-sm);
+$shadow-md: var(--app-shadow-md);
+
 $radius-sm: 4px;
 $radius-md: 8px;
 $radius-lg: 12px;
@@ -143,25 +143,23 @@ $spacing-xl: 32px;
     position: absolute;
     top: 8px;
     right: 8px;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
+    // Material guideline: alvo de toque ≥ 40 dp para ações overlay.
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: 0.2s ease;
-
-    &:hover {
-      background: #f44336;
-      transform: scale(1.1);
-    }
+    color: $warn;
+    box-shadow: $shadow-sm;
 
     mat-icon {
-      font-size: 18px;
-      color: #fff;
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
     }
   }
 }
@@ -178,27 +176,7 @@ $spacing-xl: 32px;
   width: 100%;
 }
 
-.modern-input,
-.modern-textarea {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  outline: none;
-  font-family: inherit;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-
-  &:focus {
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-  }
-}
-
-.modern-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
+// .modern-input/.modern-textarea foram substituídos por mat-form-field + matInput.
 
 .box-grid {
   display: grid;
@@ -236,17 +214,6 @@ $spacing-xl: 32px;
     position: relative;
 
     img {
-      &.portrait {
-        height: 100%;
-        width: auto;
-      }
-
-      &.landscape {
-        width: 100%;
-        height: auto;
-      }
-
-      // Classe padrão para imagens quadradas
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -328,8 +295,9 @@ $spacing-xl: 32px;
 
 .fab-button {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  // safe-area garante que o FAB não fique sob a barra de gestos do Android.
+  bottom: calc(24px + var(--safe-area-bottom));
+  right: calc(24px + var(--safe-area-right));
   background: #1976d2;
   color: white;
   border: none;
@@ -386,8 +354,8 @@ $spacing-xl: 32px;
 
   .fab-button {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: calc(24px + var(--safe-area-bottom));
+    right: calc(24px + var(--safe-area-right));
     background: #1976d2;
     color: white;
     border: none;
@@ -446,64 +414,9 @@ $spacing-xl: 32px;
   background: $card-bg;
   border-bottom: 1px solid $border;
 
-  .search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    .search-icon {
-      position: absolute;
-      left: $spacing-md;
-      color: $text-medium;
-      z-index: 1;
-    }
-
-    input {
-      width: 100%;
-      padding: $spacing-md $spacing-md $spacing-md $spacing-xl * 1.5;
-      border: 1px solid $border;
-      border-radius: $radius-md;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-
-      &:focus {
-        outline: none;
-        border-color: $primary;
-        box-shadow: 0 0 0 2px rgba($primary, 0.2);
-      }
-
-      &::placeholder {
-        color: $text-light;
-      }
-    }
-
-    @mixin button-reset {
-      border: none;
-      background: none;
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
-      font-family: inherit;
-    }
-
-    .clear-search {
-      @include button-reset;
-      position: absolute;
-      right: $spacing-md;
-      color: $text-medium;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-      }
-    }
-  }
+  // Markup antigo .search-container/.search-icon/input/.clear-search foi
+  // substituído por mat-form-field outline com matPrefix/matSuffix.
+  .search-field { width: 100%; }
 }
 
 .pagination-controls {

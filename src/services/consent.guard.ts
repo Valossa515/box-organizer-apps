@@ -30,8 +30,11 @@ export class ConsentGuard implements CanActivate {
         .open(ConsentModalComponent, {
           data: { pending },
           disableClose: true,
-          width: '520px',
-          maxWidth: '95vw'
+          // width: '95vw' garante que o modal acompanhe a tela em phones (< 520 dp);
+          // maxWidth limita o tamanho em desktop/tablet.
+          width: '95vw',
+          maxWidth: '520px',
+          autoFocus: 'first-tabbable'
         })
         .afterClosed()
         .toPromise();

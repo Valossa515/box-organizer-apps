@@ -9,6 +9,8 @@ import {
   MatDialogRef
 } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { ConsentService } from '../../../services/consent.service';
 import { PendingConsent } from '../../models/consent.model';
 
@@ -42,7 +44,13 @@ interface DialogData {
       </p>
 
       <div class="doc" *ngFor="let doc of data.pending; let i = index">
-        <a [href]="doc.url" target="_blank" rel="noopener noreferrer" class="doc-link">
+        <a
+          [href]="doc.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="doc-link"
+          (click)="openDoc($event, doc.url)"
+        >
           {{ doc.title }} <span class="version">({{ doc.version }})</span>
         </a>
         <mat-checkbox [(ngModel)]="accepted[i]" [disabled]="submitting">
@@ -99,6 +107,19 @@ export class ConsentModalComponent {
 
   get allAccepted(): boolean {
     return this.accepted.length > 0 && this.accepted.every(v => v);
+  }
+
+  /**
+   * No APK Capacitor o `target="_blank"` abre dentro da WebView do app sem
+   * controle de retorno; usamos o plugin Browser (in-app browser nativo)
+   * que oferece botão "Done" para voltar ao app.
+   */
+  openDoc(event: Event, url: string): void {
+    if (Capacitor.isNativePlatform()) {
+      event.preventDefault();
+      Browser.open({ url, presentationStyle: 'popover' }).catch(() => undefined);
+    }
+    // No web, deixa o navegador tratar o target="_blank" normalmente.
   }
 
   async confirm(): Promise<void> {

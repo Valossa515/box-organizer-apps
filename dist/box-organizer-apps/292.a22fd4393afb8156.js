@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkbox_organizer_apps=self.webpackChunkbox_organizer_apps||[]).push([[292],{4292:(a,n,e)=>{e.r(n),e.d(n,{SplashScreenWeb:()=>r});var s=e(467),o=e(5083);class r extends o.E_{show(_){return(0,s.A)(function*(){})()}hide(_){return(0,s.A)(function*(){})()}}}}]);

@@ -2,7 +2,6 @@ import { ItemModel } from './../../models/item-model';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { ItemService } from '../../../services/item.service';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +9,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { BoxService } from '../../../services/box.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import {
   containsSuspiciousPattern,
   sanitizeSearchTerm,
@@ -20,7 +24,16 @@ import { validateImageFile } from '../../core/security/file-validator';
 @Component({
   selector: 'app-items',
   standalone: true,
-  imports: [CommonModule, MatCardModule, HttpClientModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    FormsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule
+  ],
   templateUrl: './items.component.html',
   styleUrl: './items.component.scss'
 })
@@ -44,7 +57,6 @@ export class ItemsComponent implements OnInit {
   editItemModel: ItemModel = { id: '', name: '', description: '', quantity: 0, boxId: '', boxName: '', imgUrl: '' };
   selectedAddImage: File | null = null;
   selectedEditImage: File | null = null;
-  confirmDeleteItemId: string | null = null;
   boxName = '';
   searchName: string = '';
   currentPage = 1;
@@ -56,7 +68,8 @@ export class ItemsComponent implements OnInit {
     private itemService: ItemService,
     private router: Router,
     private boxService: BoxService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -202,7 +215,26 @@ export class ItemsComponent implements OnInit {
   }
 
   deleteItemConfirm(itemId: string): void {
-    this.confirmDeleteItemId = itemId;
+    const item = this.items.find(i => i.id === itemId);
+    const name = item?.name ?? 'este item';
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        width: '95vw',
+        maxWidth: '420px',
+        autoFocus: 'first-tabbable',
+        data: {
+          title: 'Excluir item',
+          message: `Tem certeza que deseja excluir "${name}"? Esta ação não pode ser desfeita.`,
+          confirmLabel: 'Excluir',
+          confirmColor: 'warn'
+        }
+      })
+      .afterClosed()
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.confirmDelete(itemId);
+        }
+      });
   }
 
   confirmDelete(itemId: string): void {
@@ -210,13 +242,8 @@ export class ItemsComponent implements OnInit {
       .then(() => {
         this.items = this.items.filter(i => i.id !== itemId);
         this.totalRecords--;
-        this.confirmDeleteItemId = null;
       })
       .catch(err => console.error('Erro ao excluir item', err));
-  }
-
-  cancelDelete(): void {
-    this.confirmDeleteItemId = null;
   }
 
   changeQuantity(item: ItemModel, delta: number): void {
