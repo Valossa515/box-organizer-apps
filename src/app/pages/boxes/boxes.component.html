@@ -9,30 +9,39 @@
 
   <!-- Barra de busca -->
   <div class="search-bar">
-    <div class="search-container">
-      <mat-icon class="search-icon">search</mat-icon>
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Pesquisar por nome</mat-label>
       <input
-        type="text"
+        matInput
+        type="search"
         [(ngModel)]="searchName"
         (ngModelChange)="onSearchChange($event)"
-        placeholder="Pesquisar por nome..."
         maxlength="100"
         autocomplete="off"
+        enterkeyhint="search"
       />
-      <button class="clear-search" (click)="clearSearch()" *ngIf="searchName">
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        *ngIf="searchName"
+        (click)="clearSearch()"
+        aria-label="Limpar busca"
+      >
         <mat-icon>clear</mat-icon>
       </button>
-    </div>
+    </mat-form-field>
 
     <!-- Paginação só para caixas -->
     <div class="pagination-controls" *ngIf="tipoSelecionado === 'caixa' && !searchName && totalPages > 0">
-      <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+      <button mat-icon-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" aria-label="Página anterior">
         <mat-icon>chevron_left</mat-icon>
       </button>
 
       <span>Página {{ currentPage }} de {{ totalPages }}</span>
 
-      <button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+      <button mat-icon-button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" aria-label="Próxima página">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
@@ -41,20 +50,27 @@
   <!-- Formulário de nova caixa -->
   <div *ngIf="showAddForm" class="add-form">
     <div class="form-fields-container">
-      <input
-        type="text"
-        placeholder="Nome da caixa"
-        [(ngModel)]="newBox.name"
-        class="modern-input"
-        maxlength="100"
-        autocomplete="off"
-      />
-      <textarea
-        placeholder="Descrição"
-        [(ngModel)]="newBox.description"
-        class="modern-textarea"
-        maxlength="1000"
-      ></textarea>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome da caixa</mat-label>
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="newBox.name"
+          maxlength="100"
+          autocomplete="off"
+          autocapitalize="sentences"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          [(ngModel)]="newBox.description"
+          maxlength="1000"
+          autocapitalize="sentences"
+        ></textarea>
+      </mat-form-field>
     </div>
 
     <div class="image-upload">

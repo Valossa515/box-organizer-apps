@@ -2,8 +2,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 1rem;
+  min-height: 100vh; // fallback
+  min-height: 100dvh;
+  padding:
+    calc(1rem + var(--safe-area-top))
+    calc(1rem + var(--safe-area-right))
+    calc(1rem + var(--safe-area-bottom))
+    calc(1rem + var(--safe-area-left));
 }
 
 .login-card {
@@ -25,7 +30,8 @@
 }
 
 .error {
-  color: red;
+  // Token Material 3: cor de erro respeita tema (light/dark) e WCAG.
+  color: var(--mat-sys-error, #b00020);
   margin-top: 1rem;
   text-align: center;
 }

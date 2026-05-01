@@ -28,6 +28,12 @@ import { AuthService } from '../../../services/auth.service';
       justify-content: center;
       gap: 1rem;
       min-height: 60vh;
+      min-height: 60dvh;
+      padding:
+        calc(1rem + var(--safe-area-top))
+        calc(1rem + var(--safe-area-right))
+        calc(1rem + var(--safe-area-bottom))
+        calc(1rem + var(--safe-area-left));
     }
   `]
 })

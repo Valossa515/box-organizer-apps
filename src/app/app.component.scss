@@ -1,0 +1,24 @@
+.app-toolbar {
+  // Sticky no topo + safe-area para não ficar sob a status bar do Android.
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding-top: var(--safe-area-top);
+  padding-left: calc(16px + var(--safe-area-left));
+  padding-right: calc(8px + var(--safe-area-right));
+  // Mat-toolbar default é 64px; somamos a safe-area p/ alinhar conteúdo.
+  height: calc(64px + var(--safe-area-top));
+  box-sizing: border-box;
+
+  .app-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .toolbar-spacer {
+    flex: 1 1 auto;
+  }
+}

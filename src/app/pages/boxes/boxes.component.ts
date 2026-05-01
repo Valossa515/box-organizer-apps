@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { BoxModel } from '../../models/box-model';
-import { HttpClientModule } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ItemModel } from '../../models/item-model';
 import { ItemService } from '../../../services/item.service';
 import {
@@ -27,12 +29,14 @@ import { validateImageFile } from '../../core/security/file-validator';
   imports: [
     CommonModule,
     MatCardModule,
-    HttpClientModule,
     MatIconModule,
     FormsModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
   ],
   templateUrl: './boxes.component.html',
   styleUrl: './boxes.component.scss',

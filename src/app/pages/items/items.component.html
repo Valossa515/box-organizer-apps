@@ -1,7 +1,7 @@
 <div class="items-app-container">
   <!-- Cabeçalho -->
   <header class="app-header">
-    <button class="back-button" (click)="goBack()">
+    <button class="back-button" (click)="goBack()" aria-label="Voltar">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h1>Itens da caixa</h1>
@@ -9,6 +9,7 @@
       class="add-button"
       (click)="showAddForm = !showAddForm"
       [class.active]="showAddForm"
+      [attr.aria-label]="showAddForm ? 'Cancelar adição' : 'Adicionar item'"
     >
       <mat-icon>{{ showAddForm ? "close" : "add" }}</mat-icon>
       {{ showAddForm ? "Cancelar" : "Adicionar" }}
@@ -16,15 +17,17 @@
   </header>
 
   <div class="pagination-controls" *ngIf="!searchName && totalPages > 0">
-    <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+    <button mat-icon-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" aria-label="Página anterior">
       <mat-icon>chevron_left</mat-icon>
     </button>
 
     <span>Página {{ currentPage }} de {{ totalPages }}</span>
 
     <button
+      mat-icon-button
       [disabled]="currentPage === totalPages"
       (click)="goToPage(currentPage + 1)"
+      aria-label="Próxima página"
     >
       <mat-icon>chevron_right</mat-icon>
     </button>
@@ -32,20 +35,29 @@
 
   <!-- Barra de pesquisa -->
   <div class="search-bar">
-    <div class="search-container">
-      <mat-icon class="search-icon">search</mat-icon>
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Pesquisar itens</mat-label>
       <input
-        type="text"
+        matInput
+        type="search"
         [(ngModel)]="searchName"
         (ngModelChange)="onSearchChange($event)"
-        placeholder="Pesquisar itens..."
         maxlength="100"
         autocomplete="off"
+        enterkeyhint="search"
       />
-      <button class="clear-search" (click)="clearSearch()" *ngIf="searchName">
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        *ngIf="searchName"
+        (click)="clearSearch()"
+        aria-label="Limpar busca"
+      >
         <mat-icon>clear</mat-icon>
       </button>
-    </div>
+    </mat-form-field>
   </div>
 
   <!-- Formulário de adição -->
@@ -53,57 +65,50 @@
     <div class="item-form">
       <h2>Adicionar Novo Item</h2>
 
-      <div class="form-group">
-        <label for="item-name">Nome *</label>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome *</mat-label>
         <input
-          id="item-name"
+          matInput
           type="text"
           [(ngModel)]="newItem.name"
-          placeholder="Digite o nome do item"
           required
           maxlength="100"
           autocomplete="off"
+          autocapitalize="sentences"
           #nameInput="ngModel"
         />
-        <div
-          *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
-          class="error-message"
-        >
+        <mat-error *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)">
           Nome é obrigatório
-        </div>
-      </div>
+        </mat-error>
+      </mat-form-field>
 
-      <div class="form-group">
-        <label for="item-description">Descrição</label>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição</mat-label>
         <textarea
-          id="item-description"
+          matInput
+          rows="3"
           [(ngModel)]="newItem.description"
-          placeholder="Digite a descrição do item"
           maxlength="1000"
+          autocapitalize="sentences"
         ></textarea>
-      </div>
+      </mat-form-field>
 
-      <div class="form-group">
-        <label for="item-quantity">Quantidade *</label>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Quantidade *</mat-label>
         <input
-          id="item-quantity"
+          matInput
           type="number"
+          inputmode="numeric"
           [(ngModel)]="newItem.quantity"
           min="1"
           max="1000000"
           required
           #quantityInput="ngModel"
         />
-        <div
-          *ngIf="
-            quantityInput.invalid &&
-            (quantityInput.dirty || quantityInput.touched)
-          "
-          class="error-message"
-        >
+        <mat-error *ngIf="quantityInput.invalid && (quantityInput.dirty || quantityInput.touched)">
           Quantidade deve ser maior que zero
-        </div>
-      </div>
+        </mat-error>
+      </mat-form-field>
 
       <div class="form-group">
         <label for="item-image">Imagem</label>
@@ -123,7 +128,7 @@
               [src]="getImageUrl(newItem.imgUrl)"
               alt="Preview"
             />
-            <button class="remove-image" (click)="newItem.imgUrl = ''">
+            <button class="remove-image" (click)="newItem.imgUrl = ''" aria-label="Remover imagem">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -140,7 +145,7 @@
   <div class="items-container">
     <!-- Indicador de carregamento -->
     <div *ngIf="loading" class="loading-indicator">
-      <mat-spinner></mat-spinner>
+      <mat-spinner [diameter]="24"></mat-spinner>
       <span>Carregando itens...</span>
     </div>
 
@@ -164,20 +169,15 @@
           <div class="card-header">
             <h3>{{ item.name }}</h3>
             <div class="card-actions">
-              <button class="edit-button" (click)="startEdit(item)">
+              <button class="edit-button" (click)="startEdit(item)" aria-label="Editar item">
                 <mat-icon>edit</mat-icon>
               </button>
               <button
                 class="delete-button"
-                (click)="
-                  confirmDeleteItemId === item.id
-                    ? cancelDelete()
-                    : deleteItemConfirm(item.id)
-                "
+                (click)="deleteItemConfirm(item.id)"
+                aria-label="Excluir item"
               >
-                <mat-icon>{{
-                  confirmDeleteItemId === item.id ? "close" : "delete"
-                }}</mat-icon>
+                <mat-icon>delete</mat-icon>
               </button>
             </div>
           </div>
@@ -214,19 +214,17 @@
               <button
                 class="quantity-button"
                 (click)="changeQuantity(item, -1)"
+                aria-label="Diminuir quantidade"
               >
                 <mat-icon>remove</mat-icon>
               </button>
               <span class="quantity-value">{{ item.quantity }}</span>
-              <button class="quantity-button" (click)="changeQuantity(item, 1)">
+              <button
+                class="quantity-button"
+                (click)="changeQuantity(item, 1)"
+                aria-label="Aumentar quantidade"
+              >
                 <mat-icon>add</mat-icon>
-              </button>
-            </div>
-
-            <div *ngIf="confirmDeleteItemId === item.id" class="delete-confirm">
-              <span>Tem certeza?</span>
-              <button class="confirm-button" (click)="confirmDelete(item.id)">
-                Sim
               </button>
             </div>
           </div>
@@ -237,68 +235,55 @@
           <div class="edit-form">
             <h3>Editar Item</h3>
 
-            <div class="form-group">
-              <label>Nome *</label>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nome *</mat-label>
               <input
+                matInput
                 type="text"
                 [(ngModel)]="editItemModel.name"
-                placeholder="Nome do item"
                 required
                 maxlength="100"
                 autocomplete="off"
+                autocapitalize="sentences"
                 #editNameInput="ngModel"
               />
-              <div
-                *ngIf="
-                  editNameInput.invalid &&
-                  (editNameInput.dirty || editNameInput.touched)
-                "
-                class="error-message"
-              >
+              <mat-error *ngIf="editNameInput.invalid && (editNameInput.dirty || editNameInput.touched)">
                 Nome é obrigatório
-              </div>
-            </div>
+              </mat-error>
+            </mat-form-field>
 
-            <div class="form-group">
-              <label>Descrição *</label>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descrição *</mat-label>
               <textarea
+                matInput
+                rows="3"
                 [(ngModel)]="editItemModel.description"
-                placeholder="Descrição do item"
                 required
                 maxlength="1000"
+                autocapitalize="sentences"
                 #editDescriptionInput="ngModel"
               ></textarea>
-              <div
-                *ngIf="
-                  editDescriptionInput.invalid &&
-                  (editDescriptionInput.dirty || editDescriptionInput.touched)
-                "
-                class="error-message"
-              >
+              <mat-error *ngIf="editDescriptionInput.invalid && (editDescriptionInput.dirty || editDescriptionInput.touched)">
                 Descrição é obrigatória
-              </div>
-            </div>
+              </mat-error>
+            </mat-form-field>
 
-            <div class="form-group">
-              <label>Quantidade *</label>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Quantidade *</mat-label>
               <input
+                matInput
                 type="number"
+                inputmode="numeric"
                 [(ngModel)]="editItemModel.quantity"
                 min="1"
                 max="1000000"
                 required
                 #editQuantityInput="ngModel"
               />
-              <div
-                *ngIf="
-                  editQuantityInput.invalid &&
-                  (editQuantityInput.dirty || editQuantityInput.touched)
-                "
-                class="error-message"
-              >
+              <mat-error *ngIf="editQuantityInput.invalid && (editQuantityInput.dirty || editQuantityInput.touched)">
                 Quantidade deve ser maior que zero
-              </div>
-            </div>
+              </mat-error>
+            </mat-form-field>
 
             <div class="form-group">
               <label>Imagem</label>
@@ -317,6 +302,7 @@
                   <button
                     class="remove-image"
                     (click)="editItemModel.imgUrl = ''"
+                    aria-label="Remover imagem"
                   >
                     <mat-icon>delete</mat-icon>
                   </button>

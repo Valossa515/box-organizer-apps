@@ -1,16 +1,22 @@
-// Variáveis de design
+@use 'sass:color';
+
+// Variáveis de design — cores de marca (não trocam entre temas).
 $primary: #1976d2;
 $primary-dark: #1565c0;
 $accent: #4caf50;
 $warn: #e53935;
-$text-dark: #333;
-$text-medium: #555;
-$text-light: #777;
-$background: #f5f7fa;
-$card-bg: #ffffff;
-$border: #e0e0e0;
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+// Cores temáticas — apontam para os tokens globais (var em src/styles.scss)
+// para reagir automaticamente ao prefers-color-scheme: dark.
+$text-dark: var(--app-color-text);
+$text-medium: var(--app-color-text-muted);
+$text-light: var(--app-color-text-soft);
+$background: var(--app-color-bg);
+$card-bg: var(--app-color-surface);
+$border: var(--app-color-border);
+$shadow-sm: var(--app-shadow-sm);
+$shadow-md: var(--app-shadow-md);
+
 $radius-sm: 4px;
 $radius-md: 8px;
 $radius-lg: 12px;
@@ -46,15 +52,17 @@ $spacing-xl: 32px;
 .items-app-container {
   font-family: 'Roboto', sans-serif;
   background: $background;
-  min-height: 100vh;
-  padding-bottom: $spacing-xl;
+  min-height: 100vh; // fallback
+  min-height: 100dvh;
+  padding-bottom: calc(#{$spacing-xl} + var(--safe-area-bottom));
 }
 
 // Cabeçalho
 .app-header {
   display: flex;
   align-items: center;
-  padding: $spacing-md $spacing-lg;
+  // Respeita o entalhe / status bar quando a webview ocupa a tela toda no Android.
+  padding: calc(#{$spacing-md} + var(--safe-area-top)) calc(#{$spacing-lg} + var(--safe-area-right)) $spacing-md calc(#{$spacing-lg} + var(--safe-area-left));
   background: $card-bg;
   box-shadow: $shadow-sm;
   position: sticky;
@@ -79,8 +87,9 @@ $spacing-xl: 32px;
   .back-button {
     @include button-reset;
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    // Material guideline: tap target mínimo 48×48 dp.
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     color: $primary;
     background: rgba($primary, 0.1);
@@ -114,7 +123,7 @@ $spacing-xl: 32px;
     white-space: nowrap;
 
     &:hover {
-      background: darken($accent, 10%);
+      background: color.adjust($accent, $lightness: -10%);
     }
 
     &.active {
@@ -136,7 +145,10 @@ $spacing-xl: 32px;
     }
 
     .add-button {
-      padding: $spacing-xs;
+      // Mantém alvo de toque ≥ 48 dp mesmo em telas pequenas.
+      min-width: 48px;
+      min-height: 48px;
+      padding: $spacing-sm;
       span {
         display: none;
       }
@@ -150,55 +162,9 @@ $spacing-xl: 32px;
   background: $card-bg;
   border-bottom: 1px solid $border;
 
-  .search-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    .search-icon {
-      position: absolute;
-      left: $spacing-md;
-      color: $text-medium;
-      z-index: 1;
-    }
-
-    input {
-      width: 100%;
-      padding: $spacing-md $spacing-md $spacing-md $spacing-xl * 1.5;
-      border: 1px solid $border;
-      border-radius: $radius-md;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-
-      &:focus {
-        outline: none;
-        border-color: $primary;
-        box-shadow: 0 0 0 2px rgba($primary, 0.2);
-      }
-
-      &::placeholder {
-        color: $text-light;
-      }
-    }
-
-    .clear-search {
-      @include button-reset;
-      position: absolute;
-      right: $spacing-md;
-      color: $text-medium;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-      }
-    }
-  }
+  // Markup antigo .search-container/.search-icon/input/.clear-search foi
+  // substituído por mat-form-field outline com matPrefix/matSuffix.
+  .search-field { width: 100%; }
 }
 
 // Formulários
@@ -372,16 +338,7 @@ $spacing-xl: 32px;
     gap: $spacing-md;
     padding: $spacing-xl;
     color: $text-medium;
-
-    mat-spinner {
-      width: 24px !important;
-      height: 24px !important;
-
-      svg {
-        width: 24px !important;
-        height: 24px !important;
-      }
-    }
+    // Tamanho controlado via [diameter] no template (sem !important).
   }
 
   .empty-state {
@@ -394,7 +351,9 @@ $spacing-xl: 32px;
       width: auto;
       height: auto;
       margin-bottom: $spacing-md;
-      color: rgba($text-medium, 0.3);
+      // Antes era rgba($text-medium, 0.3); usamos opacity para preservar dark mode.
+      color: $text-medium;
+      opacity: 0.3;
     }
 
     h3 {
@@ -462,8 +421,9 @@ $spacing-xl: 32px;
 
       button {
         @include button-reset;
-        width: 32px;
-        height: 32px;
+        // Tap target acessível em mobile (≥ 44 dp).
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -553,8 +513,9 @@ $spacing-xl: 32px;
 
       .quantity-button {
         @include button-reset;
-        width: 36px;
-        height: 36px;
+        // Tap target adequado para ações repetitivas (+ / -).
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         background: $primary;
         color: white;
@@ -579,33 +540,8 @@ $spacing-xl: 32px;
         text-align: center;
       }
     }
-
-    .delete-confirm {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: $spacing-md;
-      margin-top: $spacing-sm;
-
-      span {
-        color: $warn;
-        font-weight: 500;
-      }
-
-      .confirm-button {
-        @include button-reset;
-        padding: $spacing-xs $spacing-sm;
-        background: $warn;
-        color: white;
-        border-radius: $radius-sm;
-        font-size: 0.9rem;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: darken($warn, 10%);
-        }
-      }
-    }
+    // Markup antigo .delete-confirm/.confirm-button foi substituído por
+    // ConfirmDialogComponent (MatDialog) — ver shared/confirm-dialog.component.ts.
   }
 
   .edit-form {
