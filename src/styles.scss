@@ -9,6 +9,9 @@
 // `prefers-color-scheme` do sistema operacional.
 // ---------------------------------------------------------------------------
 html {
+  // `color-scheme` é a fonte de verdade do tema. O ThemeService sobrescreve
+  // este valor inline (style.colorScheme) para forçar light/dark/system,
+  // e os tokens --mat-sys-* gerados por mat.theme() reagem via light-dark().
   color-scheme: light dark;
 
   @include mat.theme((
@@ -29,17 +32,20 @@ html {
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
 
-  // ---- Design tokens — modo claro (default) ----
-  --app-color-primary: #1976d2;
-  --app-color-primary-dark: #1565c0;
-  --app-color-accent: #4caf50;
-  --app-color-warn: #e53935;
-  --app-color-text: #333;
-  --app-color-text-muted: #555;
-  --app-color-text-soft: #777;
-  --app-color-bg: #f5f7fa;
-  --app-color-surface: #ffffff;
-  --app-color-border: #e0e0e0;
+  // ---- Design tokens ----
+  // Apontam para tokens Material 3 (--mat-sys-*) que já reagem ao
+  // color-scheme efetivo (light/dark). Assim, o app shell e os componentes
+  // Material nunca ficam dessincronizados.
+  --app-color-primary: var(--mat-sys-primary);
+  --app-color-primary-dark: var(--mat-sys-primary);
+  --app-color-accent: var(--mat-sys-tertiary);
+  --app-color-warn: var(--mat-sys-error);
+  --app-color-text: var(--mat-sys-on-surface);
+  --app-color-text-muted: var(--mat-sys-on-surface-variant);
+  --app-color-text-soft: var(--mat-sys-outline);
+  --app-color-bg: var(--mat-sys-background);
+  --app-color-surface: var(--mat-sys-surface);
+  --app-color-border: var(--mat-sys-outline-variant);
 
   --app-radius-sm: 4px;
   --app-radius-md: 8px;
@@ -51,42 +57,8 @@ html {
   --app-space-lg: 24px;
   --app-space-xl: 32px;
 
-  --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-// ---- Dark mode tokens ----
-// Aplicado quando o SO está em modo escuro OU o usuário escolheu "dark" no
-// toggle (ThemeService define data-theme="dark"|"light" no <html>).
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --app-color-text: #e6e6e6;
-    --app-color-text-muted: #b8b8b8;
-    --app-color-text-soft: #8a8a8a;
-    --app-color-bg: #121212;
-    --app-color-surface: #1e1e1e;
-    --app-color-border: #2c2c2c;
-
-    --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-    --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
-  }
-}
-
-// Override manual via toggle (sobrepõe o media query).
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --app-color-text: #e6e6e6;
-  --app-color-text-muted: #b8b8b8;
-  --app-color-text-soft: #8a8a8a;
-  --app-color-bg: #121212;
-  --app-color-surface: #1e1e1e;
-  --app-color-border: #2c2c2c;
-  --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
-}
-
-:root[data-theme='light'] {
-  color-scheme: light;
+  --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --app-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
 html, body {
