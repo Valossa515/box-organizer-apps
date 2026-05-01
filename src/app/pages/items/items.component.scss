@@ -683,11 +683,11 @@ $spacing-xl: 32px;
     background-color: transparent;
     border: none;
     cursor: pointer;
-    color: #333;
+    color: $text-dark;
     font-size: 20px;
 
     &:disabled {
-      color: #ccc;
+      color: $text-light;
       cursor: not-allowed;
     }
   }

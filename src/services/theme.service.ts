@@ -7,8 +7,10 @@ const STORAGE_KEY = 'app.theme';
 
 /**
  * Gerencia o tema (claro/escuro/sistema). O modo escolhido é persistido em
- * localStorage e aplicado via atributo `data-theme` no <html>. styles.scss
- * trata `[data-theme="dark"]` igual a `prefers-color-scheme: dark`.
+ * localStorage e aplicado de duas formas no <html>:
+ *  - atributo `data-theme` (para hooks/CSS condicional)
+ *  - estilo inline `color-scheme` (fonte de verdade lida pelos tokens
+ *    Material 3 via `light-dark()` e pelo user-agent para form controls).
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -54,6 +56,12 @@ export class ThemeService {
         : mode;
 
     this.resolved.set(resolved);
-    document.documentElement.setAttribute('data-theme', resolved);
+
+    const root = document.documentElement;
+    root.setAttribute('data-theme', resolved);
+    // `color-scheme` inline garante que tokens Material 3 (light-dark())
+    // troquem instantaneamente, mesmo quando o usuário força um modo
+    // diferente do prefers-color-scheme do SO.
+    root.style.colorScheme = resolved;
   }
 }
