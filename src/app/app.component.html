@@ -4,6 +4,14 @@
     <span class="toolbar-spacer"></span>
     <button
       mat-icon-button
+      (click)="theme.cycle()"
+      [attr.aria-label]="'Tema atual: ' + theme.mode() + '. Clique para alternar.'"
+      [matTooltip]="'Tema: ' + themeLabel()"
+    >
+      <mat-icon>{{ themeIcon() }}</mat-icon>
+    </button>
+    <button
+      mat-icon-button
       [matMenuTriggerFor]="userMenu"
       aria-label="Abrir menu da conta"
     >
