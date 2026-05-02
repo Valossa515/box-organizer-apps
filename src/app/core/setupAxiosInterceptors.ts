@@ -29,11 +29,13 @@ export function setupAxiosInterceptors(router: Router) {
     const url = config.url ?? '';
     const isCognito = url.includes('/oauth2/');
 
+    // Requisições para o Cognito não recebem headers customizados nem o Bearer.
+    // Headers não-padrão (ex.: X-Client-Type) disparam um preflight CORS que o
+    // endpoint /oauth2/token do Cognito rejeita, impedindo o token exchange.
+    if (isCognito) return config;
+
     const isMobile = window?.Capacitor?.isNativePlatform?.() || window?.cordova;
     config.headers['X-Client-Type'] = isMobile ? 'mobile' : 'web';
-
-    // Requisições para o Cognito (token endpoint, etc.) não recebem nosso Bearer.
-    if (isCognito) return config;
 
     // Apenas anexa o Bearer em chamadas para a API.
     const isApiCall = url.startsWith(environment.apiUrl) || url.startsWith('/');

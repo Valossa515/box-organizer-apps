@@ -132,7 +132,10 @@ export class AuthService {
     await Preferences.set({ key: PKCE_VERIFIER_KEY, value: verifier });
     await Preferences.set({ key: PKCE_STATE_KEY, value: state });
 
-    const url = new URL(`https://${environment.cognito.domain}/oauth2/authorize`);
+    // signup usa /signup para mostrar a tela de cadastro diretamente;
+    // login usa o endpoint padrão OAuth2 PKCE /oauth2/authorize.
+    const path = initialScreen === 'signup' ? '/signup' : '/oauth2/authorize';
+    const url = new URL(`https://${environment.cognito.domain}${path}`);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('client_id', environment.cognito.clientId);
     url.searchParams.set('redirect_uri', environment.cognito.redirectUri);
@@ -140,10 +143,6 @@ export class AuthService {
     url.searchParams.set('state', state);
     url.searchParams.set('code_challenge', challenge);
     url.searchParams.set('code_challenge_method', 'S256');
-    if (initialScreen === 'signup') {
-      // Hosted UI mostra a aba de cadastro
-      url.pathname = '/signup';
-    }
 
     window.location.href = url.toString();
   }
