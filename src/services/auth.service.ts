@@ -18,25 +18,29 @@ interface CognitoTokenResponse {
 }
 
 /**
- * Integração com AWS Cognito Hosted UI (OAuth2 Authorization Code + PKCE).
+ * Integracao com AWS Cognito Hosted UI (OAuth2 Authorization Code + PKCE).
  *
  * Fluxo:
- *  - login() / register() → redireciona para Hosted UI
- *  - callback /auth/callback → handleCallback() troca o `code` por tokens
- *  - logout() → limpa storage e redireciona ao endpoint /logout do Cognito
+ *  - login() / register() -> redireciona para Hosted UI (/oauth2/authorize)
+ *  - callback /auth/callback -> handleCallback() troca o `code` por tokens
+ *  - logout() -> limpa storage e redireciona ao endpoint /logout do Cognito
+ *
+ * Nota: register() usa /oauth2/authorize (nao /signup) porque o endpoint
+ * /signup rejeita parametros PKCE em certos App Clients do Cognito.
+ * O cadastro fica acessivel pelo link "Criar conta" na propria Hosted UI.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   constructor(private router: Router) {}
 
-  // ---------- API pública ----------
+  // ---------- API publica ----------
 
   async login(): Promise<void> {
-    await this.redirectToHostedUi('login');
+    await this.redirectToHostedUi();
   }
 
   async register(): Promise<void> {
-    await this.redirectToHostedUi('signup');
+    await this.redirectToHostedUi();
   }
 
   async handleCallback(code: string, state: string): Promise<void> {
@@ -44,7 +48,7 @@ export class AuthService {
     const verifier = (await Preferences.get({ key: PKCE_VERIFIER_KEY })).value;
 
     if (!savedState || savedState !== state) {
-      throw new Error('State inválido no retorno do Cognito');
+      throw new Error('State invalido no retorno do Cognito');
     }
     if (!verifier) {
       throw new Error('PKCE verifier ausente');
@@ -112,7 +116,7 @@ export class AuthService {
         body.toString(),
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
-      // Cognito não devolve refresh_token em refresh; preserva o existente.
+      // Cognito nao devolve refresh_token em refresh; preserva o existente.
       await Preferences.set({ key: TOKEN_KEY, value: res.data.id_token });
       return true;
     } catch {
@@ -124,7 +128,7 @@ export class AuthService {
 
   // ---------- helpers internos ----------
 
-  private async redirectToHostedUi(initialScreen: 'login' | 'signup'): Promise<void> {
+  private async redirectToHostedUi(): Promise<void> {
     const verifier = this.randomUrlSafe(64);
     const challenge = await this.pkceChallenge(verifier);
     const state = this.randomUrlSafe(32);
@@ -132,10 +136,7 @@ export class AuthService {
     await Preferences.set({ key: PKCE_VERIFIER_KEY, value: verifier });
     await Preferences.set({ key: PKCE_STATE_KEY, value: state });
 
-    // signup usa /signup para mostrar a tela de cadastro diretamente;
-    // login usa o endpoint padrão OAuth2 PKCE /oauth2/authorize.
-    const path = initialScreen === 'signup' ? '/signup' : '/oauth2/authorize';
-    const url = new URL(`https://${environment.cognito.domain}${path}`);
+    const url = new URL(`https://${environment.cognito.domain}/oauth2/authorize`);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('client_id', environment.cognito.clientId);
     url.searchParams.set('redirect_uri', environment.cognito.redirectUri);
