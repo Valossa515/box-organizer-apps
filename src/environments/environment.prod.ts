@@ -5,8 +5,8 @@ export const environment = {
   cognito: {
     domain: 'boxorganizer-prod-b74e1a70.auth.us-east-1.amazoncognito.com',
     clientId: '3obi6so9l80jn4nls2j81vsmja',
-    redirectUri: 'https://box-organizer-apps.vercel.app/auth/callback',
-    logoutUri: 'https://box-organizer-apps.vercel.app/',
+    redirectUri: 'https://www.littleboxorganizer.com/auth/callback',
+    logoutUri: 'https://www.littleboxorganizer.com/',
     scope: 'openid email profile'
   }
 };
