@@ -111,6 +111,16 @@
   <!-- Grid de Caixas -->
   <div class="box-grid" *ngIf="tipoSelecionado === 'caixa'">
     <mat-card class="box-card" *ngFor="let box of boxes" (click)="goToItems(box.id)">
+      <button
+        class="card-action qr"
+        type="button"
+        (click)="openQrCode($event, box)"
+        aria-label="Abrir QR code da caixa"
+        matTooltip="Ver QR code"
+      >
+        <mat-icon>qr_code_2</mat-icon>
+      </button>
+
       <div class="box-content">
         <div class="box-image">
           <img [src]="box.imgUrl || 'assets/default-box-image.jpeg'" [alt]="box.name" (error)="handleImgError($event)" />
@@ -150,4 +160,39 @@
   <button class="fab-button" (click)="showAddForm = true" matTooltip="Adicionar caixa">
     <mat-icon>add</mat-icon>
   </button>
+
+  <!-- Modal QR Code -->
+  <div class="qr-modal-backdrop" *ngIf="qrModalOpen" (click)="closeQrModal()">
+    <section class="qr-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="QR code da caixa">
+      <header class="qr-modal-header">
+        <h3>QR Code: {{ qrBoxName }}</h3>
+        <button type="button" class="icon-btn" (click)="closeQrModal()" aria-label="Fechar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </header>
+
+      <div class="qr-modal-content" *ngIf="qrLoading">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Gerando QR code...</p>
+      </div>
+
+      <div class="qr-modal-content error" *ngIf="!qrLoading && qrError">
+        <mat-icon>error</mat-icon>
+        <p>{{ qrError }}</p>
+      </div>
+
+      <div class="qr-modal-content" *ngIf="!qrLoading && !qrError && qrImageUrl">
+        <img [src]="qrImageUrl" alt="QR code da caixa" class="qr-image" />
+      </div>
+
+      <footer class="qr-modal-actions" *ngIf="!qrLoading && !qrError && qrImageUrl">
+        <button type="button" class="modern-button secondary" (click)="closeQrModal()">
+          <mat-icon>close</mat-icon> Fechar
+        </button>
+        <button type="button" class="modern-button primary" (click)="downloadQrCode()">
+          <mat-icon>download</mat-icon> Baixar PNG
+        </button>
+      </footer>
+    </section>
+  </div>
 </div>
