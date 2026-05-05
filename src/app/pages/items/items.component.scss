@@ -187,6 +187,126 @@ $spacing-xl: 32px;
       text-align: center;
     }
 
+    .form-fields-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+
+    .image-upload {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      margin-block: 1rem;
+
+      .upload-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        border: 2px dashed $border;
+        border-radius: 1rem;
+        background: $background;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+        min-height: 140px;
+        text-align: center;
+
+        &:hover {
+          border-color: $primary;
+          background: $card-bg;
+        }
+
+        &.has-image {
+          border: none;
+          padding: 0;
+          background: none;
+        }
+
+        .upload-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          color: $text-medium;
+
+          mat-icon {
+            font-size: 40px;
+            width: 40px;
+            height: 40px;
+            color: $text-medium;
+          }
+
+          .upload-text {
+            font-size: 15px;
+            font-weight: 500;
+
+            span {
+              color: $primary;
+              font-weight: 600;
+              cursor: pointer;
+            }
+          }
+
+          .upload-hint {
+            font-size: 12px;
+            color: $text-light;
+          }
+        }
+
+        .image-preview {
+          position: relative;
+          width: 100%;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+          img {
+            width: 100%;
+            height: auto;
+            max-height: 220px;
+            object-fit: contain;
+            display: block;
+          }
+
+          .remove-image {
+            @include button-reset;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: $warn;
+            box-shadow: $shadow-sm;
+
+            mat-icon {
+              font-size: 1.1rem;
+              width: 1.1rem;
+              height: 1.1rem;
+            }
+          }
+        }
+      }
+
+      input[type='file'] {
+        display: none;
+      }
+    }
+
     .form-group {
       margin-bottom: $spacing-md;
       width: 100%;
@@ -294,6 +414,46 @@ $spacing-xl: 32px;
       justify-content: flex-end;
       gap: $spacing-md;
       margin-top: $spacing-lg;
+
+      .modern-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        min-width: 120px;
+        flex: 1;
+
+        &.primary {
+          background: $primary;
+          color: white;
+
+          &:hover {
+            background: $primary-dark;
+          }
+        }
+
+        &.secondary {
+          background: $border;
+          color: $text-dark;
+
+          &:hover {
+            background: $border;
+            opacity: 0.85;
+          }
+        }
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
 
       button {
         @include button-reset;
@@ -695,5 +855,21 @@ $spacing-xl: 32px;
   span {
     font-weight: bold;
     font-size: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .item-form-container .item-form .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .modern-button {
+      width: 100%;
+    }
+  }
+
+  .item-form-container .item-form .image-upload .upload-area {
+    padding: 1.5rem;
+    min-height: 120px;
   }
 }
