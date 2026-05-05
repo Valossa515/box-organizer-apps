@@ -94,4 +94,13 @@ export class BoxService {
     );
     return unwrap(res.data);
   }
+
+  async getBoxQrCode(id: string): Promise<Blob> {
+    const safeId = sanitizeIdentifier(id);
+    const res = await axios.get<Blob>(
+      `${environment.apiUrl}/box/v1/${safeId}/qrcode`,
+      { responseType: 'blob' }
+    );
+    return res.data;
+  }
 }

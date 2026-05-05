@@ -192,6 +192,7 @@ $spacing-xl: 32px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
+  position: relative;
 
   &:hover {
     transform: translateY(-4px);
@@ -247,6 +248,118 @@ $spacing-xl: 32px;
       color: $text-medium;
       margin: 0;
     }
+  }
+}
+
+.card-action {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  border: none;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  background: rgba(25, 118, 210, 0.92);
+  box-shadow: $shadow-sm;
+
+  &:hover {
+    background: rgba(21, 101, 192, 0.96);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.qr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1400;
+  padding: 1rem;
+}
+
+.qr-modal {
+  width: min(92vw, 420px);
+  background: $card-bg;
+  border: 1px solid $border;
+  border-radius: 14px;
+  box-shadow: $shadow-md;
+  overflow: hidden;
+}
+
+.qr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid $border;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: $text-dark;
+  }
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: transparent;
+  color: $text-medium;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}
+
+.qr-modal-content {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  color: $text-medium;
+
+  &.error {
+    color: $warn;
+  }
+}
+
+.qr-image {
+  width: min(100%, 280px);
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.5rem;
+}
+
+.qr-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+
+  .modern-button {
+    flex: 1;
   }
 }
 

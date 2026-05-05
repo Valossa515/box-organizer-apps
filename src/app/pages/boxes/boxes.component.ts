@@ -1,6 +1,6 @@
 import { BoxService } from '../../../services/box.service';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { BoxModel } from '../../models/box-model';
 import { MatIconModule } from '@angular/material/icon';
@@ -41,7 +41,7 @@ import { validateImageFile } from '../../core/security/file-validator';
   templateUrl: './boxes.component.html',
   styleUrl: './boxes.component.scss',
 })
-export class BoxesComponent implements OnInit {
+export class BoxesComponent implements OnInit, OnDestroy {
   boxes: BoxModel[] = [];
   items: ItemModel[] = [];
   loading = false;
@@ -64,6 +64,13 @@ export class BoxesComponent implements OnInit {
 
   tipoSelecionado: 'caixa' | 'item' = 'caixa';
 
+  qrModalOpen = false;
+  qrLoading = false;
+  qrImageUrl = '';
+  qrBoxName = '';
+  qrError = '';
+  private qrRequestSeq = 0;
+
   constructor(
     private boxService: BoxService,
     private router: Router,
@@ -73,6 +80,10 @@ export class BoxesComponent implements OnInit {
 
   ngOnInit() {
     this.loadBoxes();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeQrUrl();
   }
 
   loadBoxes() {
@@ -160,6 +171,65 @@ export class BoxesComponent implements OnInit {
 
   goToItems(boxId: string) {
     this.router.navigate(['/items', boxId]);
+  }
+
+  async openQrCode(event: Event, box: BoxModel): Promise<void> {
+    event.stopPropagation();
+    const requestId = ++this.qrRequestSeq;
+    this.qrModalOpen = true;
+    this.qrLoading = true;
+    this.qrError = '';
+    this.qrBoxName = box.name;
+    this.revokeQrUrl();
+
+    try {
+      const blob = await this.boxService.getBoxQrCode(box.id);
+      const objectUrl = URL.createObjectURL(blob);
+
+      if (!this.qrModalOpen || requestId !== this.qrRequestSeq) {
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+
+      this.qrImageUrl = objectUrl;
+    } catch (error) {
+      if (!this.qrModalOpen || requestId !== this.qrRequestSeq) return;
+      console.error('Erro ao gerar QR code', error);
+      this.qrError = 'Nao foi possivel gerar o QR code agora.';
+    } finally {
+      if (requestId !== this.qrRequestSeq) return;
+      this.qrLoading = false;
+    }
+  }
+
+  closeQrModal(): void {
+    this.qrRequestSeq++;
+    this.qrModalOpen = false;
+    this.qrLoading = false;
+    this.qrError = '';
+    this.qrBoxName = '';
+    this.revokeQrUrl();
+  }
+
+  downloadQrCode(): void {
+    if (!this.qrImageUrl) return;
+    const safeName = this.qrBoxName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const filename = safeName ? `qrcode-${safeName}.png` : 'qrcode-box.png';
+
+    const anchor = document.createElement('a');
+    anchor.href = this.qrImageUrl;
+    anchor.download = filename;
+    anchor.click();
+  }
+
+  private revokeQrUrl(): void {
+    if (this.qrImageUrl) {
+      URL.revokeObjectURL(this.qrImageUrl);
+      this.qrImageUrl = '';
+    }
   }
 
   handleImgError(event: any): void {
