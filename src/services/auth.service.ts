@@ -58,7 +58,7 @@ export class AuthService {
       grant_type: 'authorization_code',
       client_id: environment.cognito.clientId,
       code,
-      redirect_uri: environment.cognito.redirectUri,
+      redirect_uri: this.getRedirectUri(),
       code_verifier: verifier
     });
 
@@ -78,7 +78,7 @@ export class AuthService {
 
     const url = new URL(`https://${environment.cognito.domain}/logout`);
     url.searchParams.set('client_id', environment.cognito.clientId);
-    url.searchParams.set('logout_uri', environment.cognito.logoutUri);
+    url.searchParams.set('logout_uri', this.getLogoutUri());
     window.location.href = url.toString();
   }
 
@@ -139,7 +139,7 @@ export class AuthService {
     const url = new URL(`https://${environment.cognito.domain}/oauth2/authorize`);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('client_id', environment.cognito.clientId);
-    url.searchParams.set('redirect_uri', environment.cognito.redirectUri);
+    url.searchParams.set('redirect_uri', this.getRedirectUri());
     url.searchParams.set('scope', environment.cognito.scope);
     url.searchParams.set('state', state);
     url.searchParams.set('code_challenge', challenge);
@@ -153,6 +153,20 @@ export class AuthService {
     if (t.refresh_token) {
       await Preferences.set({ key: REFRESH_KEY, value: t.refresh_token });
     }
+  }
+
+  private getRedirectUri(): string {
+    if (environment.production && typeof window !== 'undefined') {
+      return `${window.location.origin}/auth/callback`;
+    }
+    return environment.cognito.redirectUri;
+  }
+
+  private getLogoutUri(): string {
+    if (environment.production && typeof window !== 'undefined') {
+      return `${window.location.origin}/`;
+    }
+    return environment.cognito.logoutUri;
   }
 
   private randomUrlSafe(byteLength: number): string {
