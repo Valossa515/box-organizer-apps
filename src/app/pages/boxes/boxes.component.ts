@@ -69,6 +69,7 @@ export class BoxesComponent implements OnInit, OnDestroy {
   qrImageUrl = '';
   qrBoxName = '';
   qrError = '';
+  private qrRequestSeq = 0;
 
   constructor(
     private boxService: BoxService,
@@ -174,6 +175,7 @@ export class BoxesComponent implements OnInit, OnDestroy {
 
   async openQrCode(event: Event, box: BoxModel): Promise<void> {
     event.stopPropagation();
+    const requestId = ++this.qrRequestSeq;
     this.qrModalOpen = true;
     this.qrLoading = true;
     this.qrError = '';
@@ -182,16 +184,26 @@ export class BoxesComponent implements OnInit, OnDestroy {
 
     try {
       const blob = await this.boxService.getBoxQrCode(box.id);
-      this.qrImageUrl = URL.createObjectURL(blob);
+      const objectUrl = URL.createObjectURL(blob);
+
+      if (!this.qrModalOpen || requestId !== this.qrRequestSeq) {
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+
+      this.qrImageUrl = objectUrl;
     } catch (error) {
+      if (!this.qrModalOpen || requestId !== this.qrRequestSeq) return;
       console.error('Erro ao gerar QR code', error);
       this.qrError = 'Nao foi possivel gerar o QR code agora.';
     } finally {
+      if (requestId !== this.qrRequestSeq) return;
       this.qrLoading = false;
     }
   }
 
   closeQrModal(): void {
+    this.qrRequestSeq++;
     this.qrModalOpen = false;
     this.qrLoading = false;
     this.qrError = '';
