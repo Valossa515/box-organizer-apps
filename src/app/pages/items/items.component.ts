@@ -353,6 +353,13 @@ export class ItemsComponent implements OnInit {
     event.target.src = 'assets/default-item-image.jpeg';
   }
 
+  removeAddImage(): void {
+    this.newItem.imgUrl = '';
+    this.selectedAddImage = null;
+    const input = document.getElementById('item-image') as HTMLInputElement | null;
+    if (input) input.value = '';
+  }
+
   getImageUrl(url: string | null | undefined): string {
     const fallback = 'assets/default-item-image.jpeg';
     if (!url) return fallback;

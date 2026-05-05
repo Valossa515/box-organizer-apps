@@ -65,78 +65,92 @@
     <div class="item-form">
       <h2>Adicionar Novo Item</h2>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nome *</mat-label>
-        <input
-          matInput
-          type="text"
-          [(ngModel)]="newItem.name"
-          required
-          maxlength="100"
-          autocomplete="off"
-          autocapitalize="sentences"
-          #nameInput="ngModel"
-        />
-        <mat-error *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)">
-          Nome é obrigatório
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Descrição</mat-label>
-        <textarea
-          matInput
-          rows="3"
-          [(ngModel)]="newItem.description"
-          maxlength="1000"
-          autocapitalize="sentences"
-        ></textarea>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Quantidade *</mat-label>
-        <input
-          matInput
-          type="number"
-          inputmode="numeric"
-          [(ngModel)]="newItem.quantity"
-          min="1"
-          max="1000000"
-          required
-          #quantityInput="ngModel"
-        />
-        <mat-error *ngIf="quantityInput.invalid && (quantityInput.dirty || quantityInput.touched)">
-          Quantidade deve ser maior que zero
-        </mat-error>
-      </mat-form-field>
-
-      <div class="form-group">
-        <label for="item-image">Imagem</label>
-        <div class="image-upload-container">
-          <label for="item-image" class="upload-button">
-            <mat-icon>upload</mat-icon>
-            <span>Selecionar Imagem</span>
-          </label>
+      <div class="form-fields-container">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome *</mat-label>
           <input
-            id="item-image"
-            type="file"
-            (change)="handleAddImage($event)"
-            accept="image/*"
+            matInput
+            type="text"
+            [(ngModel)]="newItem.name"
+            required
+            maxlength="100"
+            autocomplete="off"
+            autocapitalize="sentences"
+            #nameInput="ngModel"
           />
-          <div class="image-preview">
-            <img
-              [src]="getImageUrl(newItem.imgUrl)"
-              alt="Preview"
-            />
-            <button class="remove-image" (click)="newItem.imgUrl = ''" aria-label="Remover imagem">
-              <mat-icon>delete</mat-icon>
+          <mat-error *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)">
+            Nome é obrigatório
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descrição</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            [(ngModel)]="newItem.description"
+            maxlength="1000"
+            autocapitalize="sentences"
+          ></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Quantidade *</mat-label>
+          <input
+            matInput
+            type="number"
+            inputmode="numeric"
+            [(ngModel)]="newItem.quantity"
+            min="1"
+            max="1000000"
+            required
+            #quantityInput="ngModel"
+          />
+          <mat-error *ngIf="quantityInput.invalid && (quantityInput.dirty || quantityInput.touched)">
+            Quantidade deve ser maior que zero
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="image-upload">
+        <label class="upload-area" [class.has-image]="newItem.imgUrl" for="item-image">
+          <div *ngIf="!newItem.imgUrl" class="upload-content">
+            <mat-icon>cloud_upload</mat-icon>
+            <div class="upload-text">
+              Arraste ou <span>selecione uma imagem</span>
+            </div>
+            <div class="upload-hint">Formatos suportados: JPG, PNG (Max. 5MB)</div>
+          </div>
+          <div *ngIf="newItem.imgUrl" class="image-preview">
+            <img [src]="getImageUrl(newItem.imgUrl)" alt="Preview da imagem" />
+            <button
+              type="button"
+              (click)="$event.preventDefault(); removeAddImage()"
+              class="remove-image"
+              aria-label="Remover imagem"
+            >
+              <mat-icon>close</mat-icon>
             </button>
           </div>
-        </div>
+        </label>
+        <input
+          id="item-image"
+          type="file"
+          accept="image/*"
+          (change)="handleAddImage($event)"
+        />
       </div>
 
       <div class="form-actions">
-        <button class="save-button" (click)="createItem()">Salvar Item</button>
+        <button class="modern-button primary" (click)="createItem()">
+          <mat-icon>check</mat-icon> Salvar Item
+        </button>
+        <button
+          class="modern-button secondary"
+          (click)="showAddForm = false; resetForm(); selectedAddImage = null"
+        >
+          <mat-icon>close</mat-icon> Cancelar
+        </button>
       </div>
     </div>
   </div>
